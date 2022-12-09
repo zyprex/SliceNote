@@ -1,0 +1,87 @@
+<resources>
+    <string name="app_name">SliceNote</string>
+    <!-- toolbar menu -->
+    <string name="refresh">refresh!</string>
+    <string name="all">all</string>
+    <string name="insert">New</string>
+    <string name="search">Search</string>
+    <string name="export_list">Export</string>
+    <string name="choose_export_action">Choose Export Action</string>
+    <string name="just_export">Just export</string>
+    <string name="export_and_remove">Export and remove</string>
+    <string name="import_list">Import</string>
+    <string name="settings">Settings</string>
+    <string name="need_permission">Need Permission</string>
+    <!-- drawer -->
+    <string name="load_all">Load All</string>
+    <string name="rename_group">Rename Group</string>
+    <string name="show_hide">show hide</string>
+    <string name="descend_sort">descend</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="hide_all_seq_gt_0">Hide All Seq > 0</string>
+    <string name="show_all_seq_gt_0">Show All Seq > 0</string>
+    <string name="bulk_operation_on_flipped_slice">Bulk Operation on Flipped Slice</string>
+    <string name="light_mode">Light</string>
+    <string name="night_mode">Night</string>
+    <string name="follow_system_night_mode">Auto</string>
+    <!-- drawer sort type array -->
+    <string name="sort_no_sort">no sort</string>
+    <string name="sort_create_time">create time</string>
+    <string name="sort_modify_time">modify time</string>
+    <string name="sort_seq">seq</string>
+    <string name="sort_prior">priority</string>
+    <!-- in recyclerview -->
+    <string name="seq_input_title">Input a Number</string>
+    <string name="seq_input_message">adjust (seq)</string>
+    <string name="OK">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="edit">Edit</string>
+    <string name="prior">Prior</string>
+    <string name="delete">Delete</string>
+    <string name="deleted">Deleted</string>
+    <string name="undo">undo</string>
+    <string name="show">Show</string>
+    <string name="hide">Hide</string>
+    <string name="marks">Marks</string>
+    <string name="marks_lowercase">marks</string>
+    <string name="prior_dialog_title">Choose it priority</string>
+    <string name="prior_critical">Critical</string>
+    <string name="prior_high">High</string>
+    <string name="prior_medium">Medium</string>
+    <string name="prior_normal">Normal</string>
+    <string name="prior_low">Low</string>
+    <string name="empty_marks">empty marks</string>
+    <!-- editor activity -->
+    <string name="created_time">created_time</string>
+    <string name="modified_time">modified_time</string>
+    <string name="save_change">Save Change</string>
+    <string name="changed">changed!</string>
+    <string name="add">Add</string>
+    <string name="group">group</string>
+    <string name="front">front</string>
+    <string name="back">back</string>
+<!--    <string name="marks"></string>-->
+    <string name="expand_group_list">Expand Group List</string>
+    <!-- settings activity -->
+    <string name="touch_action">Touch Action:</string>
+    <string name="long_click">Long Click:</string>
+    <string name="swipe_left">Swipe Left:</string>
+    <string name="swipe_right">Swipe Right:</string>
+    <string name="countdown_step">Countdown Step:</string>
+    <string name="day">day</string>
+    <string name="hour">hour</string>
+    <string name="min">min</string>
+    <string name="sec">sec</string>
+    <string name="seq_btn">Seq Buttons:</string>
+    <string name="save_settings">save settings</string>
+    <string name="none">none</string>
+    <string name="hide_show">hide/show</string>
+    <string name="text_size">Text Size </string>
+    <string name="filter_field">Search Filter Field:</string>
+    <string name="dp" translatable="false">dp</string>
+    <string name="seq" translatable="false">seq</string>
+    <string name="bulk_delete">Bulk Delete</string>
+    <string name="continue_do">continue</string>
+    <string name="caution_cant_undo">CAUTION: this action can\'t be undo!</string>
+    <string name="no_slice_flipped">No slice flipped</string>
+</resources>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="80dp"
+    android:layout_marginBottom="5dp"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+        <TextView
+            android:id="@+id/seqNum"
+            android:text="0"
+            android:textSize="14sp"
+            android:textColor="?attr/colorAccent"
+            android:textAlignment="center"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            />
+        <LinearLayout
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/sliceText"
+                android:text="{void}"
+                android:textIsSelectable="true"
+                android:textSize="24sp"
+                android:padding="4dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:minHeight="44dp"/>
+            <LinearLayout
+                android:id="@+id/seqSelectLayout"
+                android:visibility="invisible"
+                android:layout_width="match_parent"
+                android:layout_height="36dp">
+                <Button
+                    android:id="@+id/seqNumSetBtn1"
+                    android:text="1"
+                    android:layout_marginEnd="8dp"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    style="?android:attr/buttonBarButtonStyle" />
+                <Button
+                    android:id="@+id/seqNumSetBtn2"
+                    android:text="2"
+                    android:layout_marginEnd="8dp"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    style="?android:attr/buttonBarButtonStyle" />
+                <Button
+                    android:id="@+id/seqNumSetBtn3"
+                    android:text="3"
+                    android:layout_marginEnd="8dp"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    style="?android:attr/buttonBarButtonStyle" />
+                <Button
+                    android:id="@+id/seqNumSetBtn4"
+                    android:text="4"
+                    android:layout_marginEnd="8dp"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    style="?android:attr/buttonBarButtonStyle" />
+                <Button
+                    android:id="@+id/seqNumSetBtn5"
+                    android:text="M"
+                    android:layout_marginEnd="8dp"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    style="?android:attr/buttonBarButtonStyle" />
+            </LinearLayout>
+        </LinearLayout>
+        <ImageButton
+            android:id="@+id/sliceItemBtn"
+            android:text=""
+            android:textAlignment="center"
+            android:background="?attr/colorButtonNormal"
+            android:textSize="24sp"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:theme="?android:attr/borderlessButtonStyle"/>
+
+    </LinearLayout>
+
+    <!-- <View
+         android:layout_width="match_parent"
+         android:layout_height="2sp"
+         android:background="#77AAAAAA" />-->
+</androidx.cardview.widget.CardView>

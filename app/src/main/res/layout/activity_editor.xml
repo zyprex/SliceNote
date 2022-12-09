@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EditorActivity">
+    <!-- AutoCompleteTextView ? -->
+    <!--    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:textAlignment="center"
+            android:text="title" />-->
+    <!--        android:background="@color/design_default_color_primary"-->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <EditText
+            android:id="@+id/groupEdit"
+            android:hint="@string/group"
+            android:layout_weight="10"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:maxLength="100"
+            android:maxLines="1"
+            android:inputType="text"
+            android:autofillHints="" />
+        <ImageButton
+            android:id="@+id/expandSpinner"
+            android:layout_weight="1"
+            android:layout_width="26sp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="14sp"
+            android:src="@drawable/ic_baseline_arrow_drop_down_24"
+            android:contentDescription="@string/expand_group_list" />
+        <Spinner
+            android:id="@+id/groupSpinner"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="invisible"
+            />
+    </LinearLayout>
+    <EditText
+        android:id="@+id/frontEdit"
+        android:hint="@string/front"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="4"
+        />
+    <EditText
+        android:id="@+id/backEdit"
+        android:hint="@string/back"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="4"
+        />
+    <EditText
+        android:id="@+id/marksEdit"
+        android:hint="@string/marks_lowercase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="4"
+        />
+    <TextView
+        android:id="@+id/createdTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="viewEnd"
+        />
+    <TextView
+        android:id="@+id/modifiedTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="viewEnd"
+        />
+    <Button
+        android:id="@+id/submitNewSlice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+</LinearLayout>
