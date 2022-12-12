@@ -29,6 +29,7 @@ class SliceAdapter(var sliceList: MutableList<Slice>, private var groupList: Mut
     RecyclerView.Adapter<SliceAdapter.ViewHolder>(), Filterable {
 
     private lateinit var delSlice: Slice
+    var flipList = mutableSetOf<Slice>()
 
     inner class ViewHolder(val mContext: Context, view: View) : RecyclerView.ViewHolder(view) {
         val sliceText: TextView = view.findViewById(R.id.sliceText)
@@ -114,10 +115,12 @@ class SliceAdapter(var sliceList: MutableList<Slice>, private var groupList: Mut
                 holder.sliceText.text = slice.back
                 holder.seqSelectLayout.visibility = View.VISIBLE
                 holder.flipped = true
+                flipList.add(slice)
             } else {
                 holder.sliceText.text = slice.front
                 holder.seqSelectLayout.visibility = View.INVISIBLE
                 holder.flipped = false
+                flipList.remove(slice)
             }
         }
         holder.sliceText.setOnLongClickListener {
@@ -172,7 +175,6 @@ class SliceAdapter(var sliceList: MutableList<Slice>, private var groupList: Mut
             holder.sliceText.setOnLongClickListener(null)
             holder.sliceText.setOnTouchListener(null)
         }
-
 
         /* item btn */
         holder.sliceItemBtn.setBackgroundColor(Color.parseColor(when(slice.prior){

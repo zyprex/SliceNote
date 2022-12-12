@@ -229,7 +229,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         lightMode.setOnClickListener {
             State.nightMode = 0
             nightModeSelector(0)
@@ -264,21 +263,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         bulkOperationOnFlippedSlice.setOnClickListener {
-            State.tempSliceList.clear()
-            for (i in 0 until rvAdapter.itemCount) {
-                val view = layoutManager.getChildAt(i) as View
-                val holder = recyclerView.getChildViewHolder(view) as SliceAdapter.ViewHolder
-                if (holder.flipped) {
-                    State.tempSliceList.add(rvAdapter.sliceList[i])
-                    //Log.d("MainActivity", rvAdapter.sliceList[i].toString())
-                }
-            }
-            if (State.tempSliceList.isEmpty()) {
+            if (rvAdapter.flipList.isEmpty()) {
                 Toast.makeText(this, resources.getString(R.string.no_slice_flipped), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             AlertDialog.Builder(this).apply {
-                setTitle("${resources.getString(R.string.bulk_operation_on_flipped_slice)} (${State.tempSliceList.count()})")
+                setTitle("${resources.getString(R.string.bulk_operation_on_flipped_slice)} (${rvAdapter.flipList.count()})")
                 setItems(arrayOf(
                     resources.getString(R.string.prior),
                     resources.getString(R.string.delete),
@@ -291,7 +281,6 @@ class MainActivity : AppCompatActivity() {
                             1 -> bulkOpDelete()
                             2 -> bulkOpHideShow()
                             3 -> bulkOpSeq()
-                            else -> State.tempSliceList.clear()
                         }
                     })
             }.show()
@@ -335,36 +324,40 @@ class MainActivity : AppCompatActivity() {
                 val s = editLine.text.toString()
                 if (s != "") {
                     val seqNum = s.toInt()
-                    for (slice in State.tempSliceList) {
+                    for (slice in rvAdapter.flipList) {
                         val index = viewModel.sliceList.indexOf(slice)
                         viewModel.updateSlice(slice)
                         viewModel.sliceList.find { it.id == slice.id }?.seq = seqNum
                         rvAdapter.notifyItemChanged(index)
                     }
+                    rvAdapter.flipList.clear()
                 }
             })
             setNegativeButton(res.getString(R.string.cancel), null)
         }.show()
+
     }
 
     private fun bulkOpHideShow() {
-        for (slice in State.tempSliceList) {
+        for (slice in rvAdapter.flipList) {
             viewModel.sliceList.remove(slice)
             slice.hide = !slice.hide
             viewModel.updateSlice(slice)
             //viewModel.sliceList.find { it.id == slice.id }?.hide = slice.hide
         }
+        rvAdapter.flipList.clear()
         rvAdapter.notifyDataSetChanged()
     }
 
     private fun bulkOpDelete() {
         AlertDialog.Builder(this).apply {
-            setTitle("${resources.getString(R.string.bulk_delete)} (${State.tempSliceList.count()})")
+            setTitle("${resources.getString(R.string.bulk_delete)} (${rvAdapter.flipList.count()})")
             setMessage(resources.getString(R.string.caution_cant_undo))
             setPositiveButton(resources.getString(R.string.continue_do), DialogInterface.OnClickListener { _,_->
-                for (slice in State.tempSliceList) {
+                for (slice in rvAdapter.flipList) {
                     viewModel.deleteSlice(slice)
                 }
+                rvAdapter.flipList.clear()
             })
             setNegativeButton(resources.getString(R.string.cancel), null)
         }.show()
@@ -385,13 +378,14 @@ class MainActivity : AppCompatActivity() {
         AlertDialog.Builder(this).apply {
             setTitle(res.getString(R.string.prior_dialog_title))
             setItems(priorityList, DialogInterface.OnClickListener { _, i ->
-                for (slice in State.tempSliceList) {
+                for (slice in rvAdapter.flipList) {
                     val index = viewModel.sliceList.indexOf(slice)
                     slice.prior = priorityI2V[i]
                     viewModel.updateSlice(slice)
                     viewModel.sliceList.find { it.id == slice.id }?.prior = slice.prior
                     rvAdapter.notifyItemChanged(index)
                 }
+                rvAdapter.flipList.clear()
             })
         }.show()
 
