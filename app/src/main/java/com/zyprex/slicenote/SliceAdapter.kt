@@ -2,34 +2,44 @@ package com.zyprex.slicenote
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.ContentUris
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
+import android.graphics.drawable.Drawable
+import android.media.Image
+import android.media.MediaPlayer
 import android.text.InputType
 import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.*
-import androidx.annotation.Keep
+import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Visibility
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import java.util.ArrayList
+import java.util.Timer
+import java.util.TimerTask
+import kotlin.math.abs
 
-class SliceAdapter(var sliceList: MutableList<Slice>, private var groupList: MutableList<String>) :
+class SliceAdapter(
+    var sliceList: MutableList<Slice>,
+    private var groupList: MutableList<String>
+) :
     RecyclerView.Adapter<SliceAdapter.ViewHolder>(), Filterable {
 
     private lateinit var delSlice: Slice
     var flipList = mutableSetOf<Slice>()
+
 
     inner class ViewHolder(val mContext: Context, view: View) : RecyclerView.ViewHolder(view) {
         val sliceText: TextView = view.findViewById(R.id.sliceText)
@@ -61,7 +71,7 @@ class SliceAdapter(var sliceList: MutableList<Slice>, private var groupList: Mut
         holder.seqNumBtn3.text = State.sSeqBtn[2].toString()
         holder.seqNumBtn4.text = State.sSeqBtn[3].toString()
 
-        fun menuActionSelector(which: Int): Boolean { /* local function */
+        fun menuActionSelector(which: Int, end: Boolean = false): Boolean { /* local function */
             when (which) {
                 1 -> menuActionEdit(holder.mContext, slice, slice.id, groupList as ArrayList<String>)
                 2 -> menuActionPrior(holder.mContext, slice, position)
@@ -69,7 +79,7 @@ class SliceAdapter(var sliceList: MutableList<Slice>, private var groupList: Mut
                 4 -> menuActionHide(slice, position)
                 5 -> menuActionMarks(holder.mContext, slice)
             }
-            return true
+            return end
         }
         /*setting restore end*/
 
@@ -110,7 +120,7 @@ class SliceAdapter(var sliceList: MutableList<Slice>, private var groupList: Mut
         /* slice text */
         holder.sliceText.text = slice.front
         holder.flipped = false
-        holder.sliceText.setOnClickListener {
+        fun onTextClick() : Boolean { /* local function */
             if (!holder.flipped) {
                 holder.sliceText.text = slice.back
                 holder.seqSelectLayout.visibility = View.VISIBLE
@@ -122,58 +132,45 @@ class SliceAdapter(var sliceList: MutableList<Slice>, private var groupList: Mut
                 holder.flipped = false
                 flipList.remove(slice)
             }
-        }
-        holder.sliceText.setOnLongClickListener {
-            //menuActionMarks(holder.mContext, slice.marks)
-            menuActionSelector(State.sTouchAction[0])
+            return true
         }
 
         var startX = 0f
-        var once = true
-        val longClickTime = 500
-        val swipeMoveLen = 100
+        var isFirst = true
+        val longClickTime = ViewConfiguration.getLongPressTimeout()
+        val swipeMoveLen = 50
         holder.sliceText.setOnTouchListener { view, motionEvent ->
             when (motionEvent.action){
                 MotionEvent.ACTION_DOWN -> {
-                    //Log.d("SliceAdapter", "DOWN ${motionEvent.x}, ${motionEvent.y} ")
                     startX = motionEvent.x
-                    once = true
+                    isFirst = true
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    //Log.d("SliceAdapter", "MOVE ${motionEvent.x}, ${motionEvent.y} ")
-                    //Log.d("SliceAdapter", "downTime: ${motionEvent.downTime}")
-                    //Log.d("SliceAdapter", "eventTime: ${motionEvent.eventTime}")
-                    if (motionEvent.eventTime - motionEvent.downTime  > longClickTime
-                        && motionEvent.x - startX < swipeMoveLen
-                        && motionEvent.x - startX > -swipeMoveLen
-                        && once) {
-                        view.performLongClick()
-                        once = false
+                    if ((motionEvent.eventTime - motionEvent.downTime  > longClickTime) &&
+                            abs(motionEvent.x - startX) < swipeMoveLen) {
+                        // long click
+                        if (isFirst) {
+                            isFirst = false
+                            menuActionSelector(State.sTouchAction[0], true)
+                        }
                     }
                 }
                 MotionEvent.ACTION_UP -> {
-                    // Log.d("SliceAdapter", "E cnt: ${motionEvent.pointerCount} ")
-                    //Log.d("SliceAdapter", "UP ${motionEvent.x}, ${motionEvent.y} ")
-                    if (motionEvent.x - startX >= swipeMoveLen) {
-                        //Toast.makeText(holder.mContext, "swipe to right", Toast.LENGTH_SHORT).show()
-                        menuActionSelector(State.sTouchAction[2])
-
-                    } else if (motionEvent.x - startX <= -swipeMoveLen) {
+                    if (motionEvent.x - startX <= -swipeMoveLen) {
                         //Toast.makeText(holder.mContext, "swipe to left", Toast.LENGTH_SHORT).show()
-                        menuActionSelector(State.sTouchAction[1])
+                        menuActionSelector(State.sTouchAction[1], true)
+                    } else if (motionEvent.x - startX >= swipeMoveLen) {
+                        //Toast.makeText(holder.mContext, "swipe to right", Toast.LENGTH_SHORT).show()
+                        menuActionSelector(State.sTouchAction[2], true)
                     } else {
                         if (motionEvent.eventTime - motionEvent.downTime  <= longClickTime) {
-                            view.performClick()
+                            //view.performClick()
+                            onTextClick()
                         }
                     }
                 }
             }
-            true
-        }
-
-        if (State.sTouchAction[0] == 0 && State.sTouchAction[1] == 0 && State.sTouchAction[2] == 0) {
-            holder.sliceText.setOnLongClickListener(null)
-            holder.sliceText.setOnTouchListener(null)
+            false
         }
 
         /* item btn */
@@ -276,107 +273,214 @@ class SliceAdapter(var sliceList: MutableList<Slice>, private var groupList: Mut
         MainViewModel().updateSlice(slice)
     }
     private fun menuActionMarks(context: Context, slice: Slice) {
-        if (slice.marks.isEmpty()) {
+        if (slice.marks.isEmpty() && slice.media == 0) {
             val res = context.resources
             Toast.makeText(context, res.getString(R.string.empty_marks), Toast.LENGTH_SHORT).show()
             return
         }
-        BottomSheetDialog(context).apply {
+        val mediaPlayer = MainActivity().mediaPlayer
+        val timer = Timer()
+        val timer2 = Timer()
+        val bottomSheetDialog = BottomSheetDialog(context)
+        bottomSheetDialog.setOnDismissListener {
+            val audioView = bottomSheetDialog.findViewById<LinearLayout>(R.id.marksAudioView)
+            if (audioView != null) {
+                mediaPlayer.reset()
+                mediaPlayer.release()
+                timer.cancel()
+            }
+            val videoView = bottomSheetDialog.findViewById<VideoView>(R.id.videoView)
+            videoView?.suspend()
+            if (videoView != null) {
+                timer2.cancel()
+            }
+        }
+        bottomSheetDialog.apply {
             setContentView(R.layout.slice_marks)
-            val textView = findViewById<TextView>(R.id.sliceMarksText)
-            textView?.text = slice.marks
-            textView?.setTextSize(TypedValue.COMPLEX_UNIT_DIP, State.sFontSize.toFloat())
-            val img = imageInMarks(context, slice)
-            if (img.isNotEmpty()) {
-               /* val imgView = ImageView(context)
-                imgView.setImageURI(img[0].uri)*/
-                /*imgView.layoutParams.width = LayoutParams.MATCH_PARENT
-                imgView.layoutParams.height = LayoutParams.WRAP_CONTENT*/
-                val linearLayout = findViewById<LinearLayout>(R.id.marksLinearLayout) as LinearLayout
-                val inflater = layoutInflater
-                val imgView = inflater.inflate(R.layout.slice_marks_img, linearLayout, false) as ImageView
-                linearLayout.addView(imgView)
-                if (img[0].size >= 1024*1024*2) {
-                    // image larger than 2M
-                    val options = BitmapFactory.Options()
-                    options.inJustDecodeBounds = false
-                    options.inSampleSize = (img[0].size / (1024*1024*2)) + 1
-                    val bitmap =
-                        BitmapFactory.decodeStream(context.contentResolver.openInputStream(img[0].uri), null, options)
-                    imgView.setImageBitmap(bitmap)
+            findViewById<View>(R.id.bottomSheetDialogClose)?.setOnClickListener {
+                dismiss()
+            }
+            if (slice.marks.isNotEmpty()) {
+                displayTextInMarks(this, slice.marks)
+            }
+            if (slice.media == 0) {
+                return show()
+            }
+            val marksMedia = MarksMedia(context, slice.group, slice.front)
+            if (arrayOf(1, 3, 5, 7).contains(slice.media)) {
+                val img = marksMedia.getImageList()
+                if (img.isNotEmpty()) {
+                    displayImageInMarks(this, img[0])
                 }
-                else {
-                    val bitmap =
-                        BitmapFactory.decodeStream(context.contentResolver.openInputStream(img[0].uri))
-                    imgView.setImageBitmap(bitmap)
+            }
+            if (arrayOf(2, 3, 6, 7).contains(slice.media)) {
+                val aud = marksMedia.getAudioList()
+                if (aud.isNotEmpty()) {
+                    displayAudioInMarks(this, aud[0], mediaPlayer, timer)
                 }
-                imgView.setOnClickListener {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.setDataAndType(img[0].uri, "image/*")
-                    context.startActivity(intent)
+            }
+            if (arrayOf(4, 5, 6, 7).contains(slice.media)) {
+                val vid = marksMedia.getVideoList()
+                if (vid.isNotEmpty()) {
+                    displayVideoInMarks(this, vid[0], timer2)
                 }
             }
         }.show()
     }
-    data class MarksImage(val uri: Uri, val name: String, val size: Int, val width: Int, val height: Int)
-    private fun imageInMarks(context: Context, slice: Slice): MutableList<MarksImage> {
-        val imageList = mutableListOf<MarksImage>()
-        if (slice.marks == "" || slice.group == "" || slice.front == "") {
-            return imageList
+    private fun displayExtraView(context: Context, view: BottomSheetDialog, resId: Int): View {
+        val linearLayout = view.findViewById<LinearLayout>(R.id.marksLinearLayout)
+        val inflater = LayoutInflater.from(context)
+        val newView = inflater.inflate(resId, linearLayout, false)
+        linearLayout?.addView(newView)
+        return newView
+    }
+    private fun displayTextInMarks(view: BottomSheetDialog, txt: String) {
+        val context = view.context
+        val txtView = displayExtraView(context, view, R.layout.slice_marks_txt) as TextView
+        txtView.text = txt
+        txtView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, State.sFontSize.toFloat())
+    }
+    private fun displayImageInMarks(view: BottomSheetDialog, img: MarksMedia.Image) {
+        val context = view.context
+        val imgView = displayExtraView(context, view, R.layout.slice_marks_img) as ImageView
+        if (img.size >= 1024*1024*2) {
+            // image larger than 2M
+            val options = BitmapFactory.Options()
+            options.inJustDecodeBounds = false
+            options.inSampleSize = (img.size / (1024*1024*2)) + 1
+            val bitmap =
+                BitmapFactory.decodeStream(context.contentResolver.openInputStream(img.uri), null, options)
+            imgView.setImageBitmap(bitmap)
         }
-        val dirGroupName = legalFileName(slice.group)
-        var imgName = legalFileName(slice.front)
-        if (imgName.length > 100) {
-            imgName = imgName.substring(0, 100)
+        else {
+            val bitmap =
+                BitmapFactory.decodeStream(context.contentResolver.openInputStream(img.uri))
+            imgView.setImageBitmap(bitmap)
         }
-        val relativePath = "SliceNote/$dirGroupName/$imgName."
-        // read image from media store
-        val resolver = context.contentResolver
-        val collection =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
-            } else {
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        imgView.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.setDataAndType(img.uri, "image/*")
+            context.startActivity(intent)
+        }
+    }
+    private fun displayAudioInMarks(view: BottomSheetDialog, aud: MarksMedia.Audio, mediaPlayer: MediaPlayer, timer: Timer) {
+        val context = view.context
+        val audView = displayExtraView(context, view, R.layout.slice_marks_aud) as LinearLayout
+        fun initMediaPlayer(aud: MarksMedia.Audio) { /* local */
+            mediaPlayer.apply{
+                setDataSource(context, aud.uri)
+                prepareAsync()
             }
-        val projection = arrayOf(
-            MediaStore.Images.Media._ID,
-            MediaStore.Images.Media.DISPLAY_NAME,
-            MediaStore.Images.Media.SIZE,
-            MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
-            MediaStore.Images.Media.WIDTH,
-            MediaStore.Images.Media.HEIGHT,
-            MediaStore.Images.Media.DATA
-        )
-        val selection = "${MediaStore.Images.Media.BUCKET_DISPLAY_NAME} = ?"
-        val cursor = resolver.query(collection, projection, selection, arrayOf(dirGroupName), null)
-        cursor?.use { cursor ->
-            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-            val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
-            val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
-            val pathColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-            val widthColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)
-            val heightColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idColumn)
-                val contentUri = ContentUris.withAppendedId(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                id)
-                val name = cursor.getString(nameColumn)
-                val size = cursor.getInt(sizeColumn)
-                val width = cursor.getInt(widthColumn)
-                val height = cursor.getInt(heightColumn)
-                val path = cursor.getString(pathColumn)
-                //Log.d("SliceAdapter", path)
-                if (path.contains(relativePath)) {
-                    // stores column values to local object
-                    imageList += MarksImage(contentUri, name, size, width, height)
+        }
+        val albumArt = audView.findViewById<ImageView>(R.id.albumArt)
+        val audioTitle = audView.findViewById<TextView>(R.id.audioTitle)
+        val audioSeekBar = audView.findViewById<SeekBar>(R.id.audioSeekBar)
+        val audioPlay = audView.findViewById<ImageButton>(R.id.audioPlay)
+        val audioStop = audView.findViewById<ImageButton>(R.id.audioStop)
+        val audioOpenBy = audView.findViewById<ImageButton>(R.id.audioOpenBy)
+        audioOpenBy.setOnClickListener {
+            val intent = Intent()
+            intent.action = Intent.ACTION_VIEW
+            intent.setDataAndType(aud.uri, "audio/*")
+            context.startActivity(intent)
+        }
+        if (aud.albumArt != null) {
+            albumArt.setImageBitmap(aud.albumArt)
+        }
+        initMediaPlayer(aud)
+        mediaPlayer.setOnPreparedListener {
+            audioSeekBar.max = mediaPlayer.duration
+            audioPlay.setImageDrawable(imageOnButton(context, R.drawable.ic_baseline_play_arrow_24))
+            audioTitle.text = aud.title
+            audioPlay.setOnClickListener {
+                if (!mediaPlayer.isPlaying) {
+                    audioPlay.setImageDrawable(imageOnButton(context, R.drawable.ic_baseline_pause_24))
+                    mediaPlayer.start()
+                    timer.schedule(object : TimerTask() {
+                        override fun run() {
+                            audioSeekBar.progress = mediaPlayer.currentPosition
+                        }
+                    }, 0, 20)
+                } else {
+                    audioPlay.setImageDrawable(imageOnButton(context, R.drawable.ic_baseline_play_arrow_24))
+                    mediaPlayer.pause()
+                }
+            }
+            audioStop.setOnClickListener {
+                mediaPlayer.reset()
+                initMediaPlayer(aud)
+            }
+            audioSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(SeekBar: SeekBar?, i: Int, b: Boolean) {}
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    seekBar?.progress?.let { it -> mediaPlayer.seekTo(it) }
+                }
+            })
+        }
+        mediaPlayer.setOnCompletionListener {
+            mediaPlayer.reset()
+            initMediaPlayer(aud)
+            audioPlay.setImageDrawable(imageOnButton(context, R.drawable.ic_baseline_play_arrow_24))
+        }
+        mediaPlayer.setOnErrorListener { mediaPlayer, _, _ ->
+            mediaPlayer.reset()
+            initMediaPlayer(aud)
+            true
+        }
+    }
+    private fun displayVideoInMarks(view: BottomSheetDialog, vid: MarksMedia.Video, timer: Timer) {
+        val context = view.context
+        val vidView = displayExtraView(context, view, R.layout.slice_marks_vid) as LinearLayout
+        val videoView = vidView.findViewById<VideoView>(R.id.videoView)
+
+        val videoPlay = vidView.findViewById<ImageView>(R.id.videoPlay)
+        val videoOpenBy = vidView.findViewById<ImageView>(R.id.videoOpenBy)
+        val videoSeekBar = vidView.findViewById<SeekBar>(R.id.videoSeekBar)
+
+        val display = context.resources.displayMetrics
+        val videoHeight = display.widthPixels * vid.height / vid.width
+        val videoViewContainer = vidView.findViewById<FrameLayout>(R.id.videoViewContainer)
+        videoViewContainer.layoutParams.height = videoHeight
+
+        videoView.setVideoURI(vid.uri)
+        videoView.setZOrderOnTop(true)
+        videoView.setOnPreparedListener {
+            videoSeekBar.max = videoView.duration
+            videoSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(SeekBar: SeekBar?, i: Int, b: Boolean) {}
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    seekBar?.progress?.let { it -> videoView.seekTo(it) }
+                }
+            })
+            videoPlay.setOnClickListener {
+                if (videoView.isPlaying) {
+                    videoView.pause()
+                    videoPlay.setImageDrawable(imageOnButton(context, R.drawable.ic_baseline_play_arrow_24))
+                } else {
+                    videoView.start()
+                    videoPlay.setImageDrawable(imageOnButton(context, R.drawable.ic_baseline_pause_24))
+                    timer.schedule(object : TimerTask() {
+                        override fun run() {
+                            videoSeekBar.progress = videoView.currentPosition
+                        }
+                    }, 0, 20)
                 }
             }
         }
-        //Log.d("SliceAdapter", imageList.toString())
-        return imageList
+
+        videoView.setOnCompletionListener {
+            videoPlay.setImageDrawable(imageOnButton(context, R.drawable.ic_baseline_play_arrow_24))
+        }
+        videoOpenBy.setOnClickListener {
+            val intent = Intent()
+            intent.action = Intent.ACTION_VIEW
+            intent.setDataAndType(vid.uri, "video/*")
+            context.startActivity(intent)
+        }
     }
-    override fun getItemCount() = sliceList.size
+    override fun getItemCount() = sliceList.count()
     override fun getFilter(): Filter {
         return object : Filter() {
             @SuppressLint("NotifyDataSetChanged")
@@ -405,4 +509,3 @@ class SliceAdapter(var sliceList: MutableList<Slice>, private var groupList: Mut
         }
     }
 }
-

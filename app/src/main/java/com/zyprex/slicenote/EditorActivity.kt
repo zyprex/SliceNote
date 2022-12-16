@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Spinner
@@ -30,22 +31,22 @@ class EditorActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_editor)
 
-        var groupList = intent.getStringArrayListExtra("group_list")
-        var inGroup = intent.getStringExtra("in_group")
+        val groupList = intent.getStringArrayListExtra("group_list")
+        val inGroup = intent.getStringExtra("in_group")
 
         var theCreatedTime = Date().time
-        var theCreatedTimeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS", Locale.getDefault()).format(theCreatedTime)
+        var theCreatedTimeFormat = SimpleDateFormat(State.dateFormat, Locale.getDefault()).format(theCreatedTime)
         findViewById<TextView>(R.id.createdTime).text = String.format("%s: %s", resources.getString(R.string.created_time), theCreatedTimeFormat)
-
-        var theModifiedTime = theCreatedTime
-        var theModifiedTimeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS", Locale.getDefault()).format(theModifiedTime)
-        findViewById<TextView>(R.id.modifiedTime).text = String.format("%s: %s", resources.getString(R.string.modified_time), theModifiedTimeFormat)
+        findViewById<TextView>(R.id.modifiedTime).text = String.format("%s: %s", resources.getString(R.string.modified_time), theCreatedTimeFormat)
 
         val groupEdit = findViewById<EditText>(R.id.groupEdit)
         val frontEdit = findViewById<EditText>(R.id.frontEdit)
         val backEdit = findViewById<EditText>(R.id.backEdit)
         val marksEdit = findViewById<EditText>(R.id.marksEdit)
 
+        val mediaState0 = findViewById<CheckBox>(R.id.mediaState0)
+        val mediaState1 = findViewById<CheckBox>(R.id.mediaState1)
+        val mediaState2 = findViewById<CheckBox>(R.id.mediaState2)
 
         val expandSpinner = findViewById<ImageButton>(R.id.expandSpinner)
         expandSpinner.setOnClickListener {
@@ -55,7 +56,7 @@ class EditorActivity : AppCompatActivity() {
         }
 
         val groupSpinner = findViewById<Spinner>(R.id.groupSpinner)
-        val adapter = ArrayAdapter(this, android.R.layout.preference_category, groupList as MutableList<String>)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, groupList as MutableList<String>)
         groupSpinner.adapter = adapter
         //groupSpinner.setSelection(0, true) // don't trigger spinner
         groupSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -72,6 +73,7 @@ class EditorActivity : AppCompatActivity() {
             }
         }
         groupSpinner.setSelection(groupList.indexOf(inGroup), true)
+
         val submitNewSlice = findViewById<Button>(R.id.submitNewSlice)
         submitNewSlice.text = resources.getString(R.string.add)
         submitNewSlice.setOnClickListener {
@@ -82,8 +84,25 @@ class EditorActivity : AppCompatActivity() {
             val theFront = frontEdit.text.toString()
             val theBack = backEdit.text.toString()
             val theMarks = marksEdit.text.toString()
-            val newSlice = Slice(theGroup, theFront, theBack, theMarks, theCreatedTime, theModifiedTime)
-
+            var theMedia = 0
+            if (mediaState0.isChecked) {
+                theMedia += 1
+            }
+            if (mediaState1.isChecked) {
+                theMedia += 2
+            }
+            if (mediaState2.isChecked) {
+                theMedia += 4
+            }
+            val newSlice = Slice(
+                group = theGroup,
+                front = theFront,
+                back = theBack,
+                marks = theMarks,
+                createTime = theCreatedTime,
+                modifyTime = 0L,
+                media = theMedia
+            )
             newSlices.add(newSlice)
             if (!groupList.contains(theGroup)) {
                 groupList.add(theGroup)
@@ -93,14 +112,14 @@ class EditorActivity : AppCompatActivity() {
             frontEdit.setText("")
             backEdit.setText("")
             marksEdit.setText("")
+            mediaState0.isChecked = false
+            mediaState1.isChecked = false
+            mediaState2.isChecked = false
 
             theCreatedTime = Date().time
             theCreatedTimeFormat = SimpleDateFormat(State.dateFormat, Locale.getDefault()).format(theCreatedTime)
             findViewById<TextView>(R.id.createdTime).text = String.format("%s: %s", resources.getString(R.string.created_time), theCreatedTimeFormat)
-
-            theModifiedTime = theCreatedTime
-            theModifiedTimeFormat = SimpleDateFormat(State.dateFormat, Locale.getDefault()).format(theModifiedTime)
-            findViewById<TextView>(R.id.modifiedTime).text = String.format("%s: %s", resources.getString(R.string.modified_time), theModifiedTimeFormat)
+            findViewById<TextView>(R.id.modifiedTime).text = String.format("%s: %s", resources.getString(R.string.modified_time), theCreatedTimeFormat)
         }
     }
 

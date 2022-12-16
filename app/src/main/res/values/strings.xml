@@ -60,7 +60,10 @@
     <string name="group">group</string>
     <string name="front">front</string>
     <string name="back">back</string>
-<!--    <string name="marks"></string>-->
+    <string name="image">image</string>
+    <string name="audio">audio</string>
+    <string name="video">video</string>
+    <!--    <string name="marks"></string>-->
     <string name="expand_group_list">Expand Group List</string>
     <!-- settings activity -->
     <string name="touch_action">Touch Action:</string>
@@ -84,4 +87,6 @@
     <string name="continue_do">continue</string>
     <string name="caution_cant_undo">CAUTION: this action can\'t be undo!</string>
     <string name="no_slice_flipped">No slice flipped</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -8,7 +8,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
+import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.InputType
@@ -28,7 +28,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import java.io.BufferedReader
 import java.io.FileInputStream
@@ -47,6 +49,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var rvAdapter: SliceAdapter
     private lateinit var spAdapter: ArrayAdapter<String>
+
+    val mediaPlayer = MediaPlayer()
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,10 +84,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         toolbar.setOnClickListener {
-            if (currentGroup != "") {
-                showGroupSlice()
-                Toast.makeText(this, resources.getString(R.string.refresh), Toast.LENGTH_SHORT).show()
-            }
+            showGroupSlice()
+            Toast.makeText(this, resources.getString(R.string.refresh), Toast.LENGTH_SHORT).show()
         }
         toolbar.setOnLongClickListener {
             val showHide = findViewById<CheckBox>(R.id.showHide)
@@ -131,7 +133,6 @@ class MainActivity : AppCompatActivity() {
                     .setNegativeButton(resources.getString(R.string.cancel), null)
                     .show()
             }
-
         }
 
         spAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, viewModel.sliceGroupList)
@@ -394,6 +395,7 @@ class MainActivity : AppCompatActivity() {
     private fun showGroupSlice() {
         //Log.d("MainActivity", "showSlices: $who")
         viewModel.loadSlices(currentGroup, currentShowHide, currentSort, currentReverseSort)
+        rvAdapter.flipList.clear()
     }
 
     private fun nightModeSelector(i: Int) {
@@ -488,6 +490,16 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         saveToPrefs()
         super.onDestroy()
+        val marksLinearLayout = findViewById<LinearLayout>(R.id.marksLinearLayout)
+        if (marksLinearLayout != null) {
+            if (marksLinearLayout.findViewById<LinearLayout>(R.id.marksAudioView) != null) {
+                mediaPlayer.reset()
+                mediaPlayer.release()
+            }
+            marksLinearLayout.findViewById<VideoView>(R.id.videoView)?.suspend()
+        }
+
+
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

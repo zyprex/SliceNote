@@ -11,4 +11,5 @@
     <color name="toolbarBg">#888</color>
     <color name="bottomSheetDialogBg">#fff</color>
     <color name="bottomSheetDialogFg">#000</color>
+    <color name="bottomSheetDialogBar">#aaa</color>
 </resources>

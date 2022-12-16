@@ -75,4 +75,7 @@
     <string name="choose_export_action">请选择导出方式</string>
     <string name="just_export">仅导出</string>
     <string name="export_and_remove">导出并移除</string>
+    <string name="image">图片</string>
+    <string name="audio">音频</string>
+    <string name="video">视频</string>
 </resources>

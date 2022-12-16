@@ -6,6 +6,7 @@ import android.os.Message
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import java.util.Date
 import kotlin.concurrent.thread
 
 class MainViewModel : ViewModel() {
@@ -100,12 +101,25 @@ class MainViewModel : ViewModel() {
         }
     }
     fun addUniqueSlice(slice: Slice) {
+        val nowTime = Date().time
         thread {
             val sameSlices = sliceDao.querySameSlice(slice.group, slice.front, slice.back, slice.marks)
             if (sameSlices.isEmpty()) {
                 sliceDao.insertSlice(
-                    Slice(slice.group, slice.front, slice.back, slice.marks,
-                        slice.createTime, slice.modifyTime, slice.seq, slice.prior, slice.hide))
+                    Slice(
+                        slice.group, slice.front, slice.back, slice.marks,
+                        slice.createTime,
+                        // compatible for v1.x backup file
+                        if (nowTime < slice.createTime + slice.modifyTime) {
+                            slice.modifyTime - slice.createTime
+                        } else {
+                            slice.modifyTime
+                        },
+                        slice.seq, slice.prior,
+                        slice.hide, slice.media
+                    )
+                )
+
             }
         }
     }
