@@ -1,4 +1,11 @@
-# SliceNote
+# Update Notice
+
+## v2.0
+
+First, make the full backup file, unintall v1.x, then import backup file.
+This version support audio and video in marks.
+
+# About
 
 In this app, a "slice" means item or card.
 
@@ -8,6 +15,7 @@ Common Role for this app:
 - Todo List
 - Memo
 - Notes
+- Short wiki
 
 ## Quick Guide
 
@@ -50,5 +58,4 @@ For instance:
 1. click title will refresh list
 2. long click title to show hidden list
 3. export only apply on current group , if you want export all data, just click button "All" and then use menu's export
-
 
