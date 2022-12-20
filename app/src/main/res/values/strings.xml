@@ -9,6 +9,9 @@
     <string name="choose_export_action">Choose Export Action</string>
     <string name="just_export">Just export</string>
     <string name="export_and_remove">Export and remove</string>
+    <string name="choose_import_action">Choose Import Action</string>
+    <string name="import_from_file_m">Import from (multiple) file</string>
+    <string name="import_from_clipboard">Import from clipboard</string>
     <string name="import_list">Import</string>
     <string name="settings">Settings</string>
     <string name="need_permission">Need Permission</string>
@@ -60,7 +63,10 @@
     <string name="group">group</string>
     <string name="front">front</string>
     <string name="back">back</string>
-<!--    <string name="marks"></string>-->
+    <string name="image">image</string>
+    <string name="audio">audio</string>
+    <string name="video">video</string>
+    <!--    <string name="marks"></string>-->
     <string name="expand_group_list">Expand Group List</string>
     <!-- settings activity -->
     <string name="touch_action">Touch Action:</string>

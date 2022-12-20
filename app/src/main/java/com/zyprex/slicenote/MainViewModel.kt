@@ -6,6 +6,7 @@ import android.os.Message
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import java.util.Date
 import kotlin.concurrent.thread
 
 class MainViewModel : ViewModel() {
@@ -99,13 +100,35 @@ class MainViewModel : ViewModel() {
             sliceDao.deleteSlice(slice)
         }
     }
-    fun addUniqueSlice(slice: Slice) {
+    fun addUniqueSlices(slices: List<Slice>) {
+        val nowTime = Date().time
         thread {
-            val sameSlices = sliceDao.querySameSlice(slice.group, slice.front, slice.back, slice.marks)
-            if (sameSlices.isEmpty()) {
-                sliceDao.insertSlice(
-                    Slice(slice.group, slice.front, slice.back, slice.marks,
-                        slice.createTime, slice.modifyTime, slice.seq, slice.prior, slice.hide))
+            slices.forEach { slice ->
+                val sameSlices = sliceDao.querySameSlice(slice.group, slice.front, slice.back, slice.marks)
+                if (sameSlices.isEmpty()) {
+                    sliceDao.insertSlice(
+                        Slice(
+                            if (slice.group == "") {
+                                State.defaultGroupName
+                            } else {
+                                slice.group
+                            }, slice.front, slice.back, slice.marks,
+                            // property neglected
+                            if (slice.createTime == 0L) {
+                                nowTime
+                            } else {
+                                slice.createTime
+                            },
+                            // compatible for v1.x backup file
+                            if (nowTime < slice.createTime + slice.modifyTime) {
+                                slice.modifyTime - slice.createTime
+                            } else {
+                                slice.modifyTime
+                            },
+                            slice.seq, slice.prior, slice.hide, slice.media
+                        )
+                    )
+                }
             }
         }
     }
