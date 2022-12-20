@@ -438,9 +438,14 @@ class SliceAdapter(
         val videoOpenBy = vidView.findViewById<ImageView>(R.id.videoOpenBy)
         val videoSeekBar = vidView.findViewById<SeekBar>(R.id.videoSeekBar)
 
-        val display = context.resources.displayMetrics
-        val videoHeight = display.widthPixels * vid.height / vid.width
+
         val videoViewContainer = vidView.findViewById<FrameLayout>(R.id.videoViewContainer)
+        val display = context.resources.displayMetrics
+        var videoHeight = display.widthPixels * vid.height / vid.width
+        if (videoHeight > display.heightPixels) {
+            videoHeight = display.heightPixels
+        }
+        //Log.d("SliceAdapter", "video(w*h): ${vid.width}*${vid.height}, screen(w*h): ${display.widthPixels}*${display.heightPixels}")
         videoViewContainer.layoutParams.height = videoHeight
 
         videoView.setVideoURI(vid.uri)

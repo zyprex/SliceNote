@@ -78,4 +78,7 @@
     <string name="image">图片</string>
     <string name="audio">音频</string>
     <string name="video">视频</string>
+    <string name="choose_import_action">请选择导入方式</string>
+    <string name="import_from_file_m">自（多个）文件导入</string>
+    <string name="import_from_clipboard">自剪贴板导入</string>
 </resources>

@@ -4,6 +4,9 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipDescription
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -28,9 +31,8 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import java.io.BufferedReader
 import java.io.FileInputStream
@@ -542,32 +544,62 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private val getBackupFile = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uriList ->
-        val newGroupList = mutableSetOf<String>()
+        val groupList = mutableSetOf<String>()
         for (uri in uriList) {
             applicationContext.contentResolver.openFileDescriptor(uri, "r")?.use { fd ->
                 val content = StringBuilder()
-
                 FileInputStream(fd.fileDescriptor).use { fis ->
                     BufferedReader(fis.reader()).forEachLine {
                         content.append(it)
                     }
                 }
-                val gson = Gson()
-                val typeOf = object : TypeToken<List<Slice>>() {}.type
-                val bkList = gson.fromJson<List<Slice>>(content.toString(), typeOf)
+                val bkList = importStringAsData(content.toString())
                 bkList.forEach { s ->
-                    MainViewModel().addUniqueSlice(s)
-                    newGroupList.add(s.group)
+                    groupList.add(s.group)
                 }
             }
         }
         if (uriList.isNotEmpty()) {
             //restartActivity()
-            newGroupList.addAll(viewModel.sliceGroupList)
-            viewModel.sliceGroupList.clear()
-            viewModel.sliceGroupList.addAll(newGroupList)
-            spAdapter.notifyDataSetChanged()
+            changeGroupList(groupList)
         }
+    }
+    private fun getDataFromClipText(context: Context) {
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val description = clipboard.primaryClipDescription
+        if (description != null) {
+            if (description.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
+                val clipData = clipboard.primaryClip as ClipData
+                val clipItem = clipData.getItemAt(0) as ClipData.Item
+                val text = clipItem.text.toString()
+                // get clip text successful!
+                val groupList = mutableSetOf<String>()
+                val bkList = importStringAsData(text)
+                bkList.forEach { s -> groupList.add(s.group) }
+                changeGroupList(groupList)
+            }
+        }
+    }
+    private fun changeGroupList(groupList: MutableSet<String>) {
+        val newGroupList = mutableSetOf<String>()
+        newGroupList.addAll(viewModel.sliceGroupList)
+        newGroupList.addAll(groupList)
+        viewModel.sliceGroupList.clear()
+        viewModel.sliceGroupList.addAll(newGroupList)
+        spAdapter.notifyDataSetChanged()
+    }
+    private fun importStringAsData(string: String): List<Slice> {
+        val gson = Gson()
+        val typeOf = object : TypeToken<List<Slice>>() {}.type
+        try {
+            val bkList = gson.fromJson<List<Slice>>(string, typeOf)
+            MainViewModel().addUniqueSlices(bkList)
+            return bkList
+        } catch (e: JsonSyntaxException) {
+            Toast.makeText(this, "ERROR: $e", Toast.LENGTH_LONG).show()
+        }
+        return listOf()
+
     }
     private fun exportToJsonFile() {
         viewModel.cacheGroupSlice(currentGroup)
@@ -592,9 +624,6 @@ class MainActivity : AppCompatActivity() {
         val searchView = searchViewItem?.actionView as SearchView
         searchView.queryHint = resources.getString(R.string.search)
         searchView.setOnSearchClickListener {
-//            val searchEditText = searchView.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
-//            searchEditText.setTextColor(ContextCompat.getColor(this, R.color.white))
-//            searchEditText.setHintTextColor(ContextCompat.getColor(this, R.color.white))
             State.tempSliceList.clear()
             State.tempSliceList.addAll(viewModel.sliceList)
         }
@@ -604,7 +633,6 @@ class MainActivity : AppCompatActivity() {
             }
             override fun onQueryTextSubmit(query: String?): Boolean {
                 rvAdapter.filter.filter(query)
-                //Toast.makeText(applicationContext, p0, Toast.LENGTH_SHORT).show()
                 return false
             }
         })
@@ -644,7 +672,18 @@ class MainActivity : AppCompatActivity() {
                 }.show()
             }
             R.id.importList -> {
-                getBackupFile.launch(arrayOf("application/json"))
+                AlertDialog.Builder(this).apply {
+                    setTitle(resources.getString(R.string.choose_import_action))
+                    setItems(arrayOf(
+                        resources.getString(R.string.import_from_file_m),
+                        resources.getString(R.string.import_from_clipboard),
+                    ), DialogInterface.OnClickListener { _, i ->
+                        when(i) {
+                            0 -> getBackupFile.launch(arrayOf("application/json"))
+                            1 -> getDataFromClipText(context)
+                        }
+                    })
+                }.show()
             }
             R.id.settings -> {
                 startActivity(Intent(this, SettingActivity::class.java))
