@@ -11,6 +11,10 @@ import kotlin.concurrent.thread
 
 class MainViewModel : ViewModel() {
 
+    companion object {
+        var newAdd = false
+    }
+
     var sliceListLiveData = MutableLiveData<MutableList<Slice>>()
     var sliceGroupListLiveData = MutableLiveData<MutableList<String>>()
     var sliceList = mutableListOf<Slice>()
@@ -132,15 +136,12 @@ class MainViewModel : ViewModel() {
             }
         }
     }
-    fun addNewSlices(slices: MutableList<Slice>, group: String) {
+    fun addNewSlices(slices: MutableList<Slice>) {
         thread {
             for (s in slices) {
                 sliceDao.insertSlice(s)
             }
-            sliceList.addAll(slices.filter { s ->
-                s.group == group
-            })
-            sliceListLiveData.postValue(sliceList)
+            newAdd = true
             updateSliceGroupList()
         }
     }

@@ -39,6 +39,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.ArrayList
 import java.util.Date
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
@@ -291,6 +292,11 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        showGroupSlice()
+    }
+
     private fun requestReadStoragePermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) !=
             PackageManager.PERMISSION_GRANTED
@@ -525,7 +531,16 @@ class MainActivity : AppCompatActivity() {
     private val getResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK) {
             val newSlices = it.data?.getParcelableArrayListExtra<Slice>("new_slices")
-            viewModel.addNewSlices(newSlices as MutableList<Slice>, currentGroup)
+            viewModel.addNewSlices(newSlices as MutableList<Slice>)
+            thread {
+                while (!MainViewModel.newAdd) {
+                    Thread.sleep(100)
+                }
+                showGroupSlice()
+                MainViewModel.newAdd = false
+                Log.d("MainActivity","new!")
+            }
+
         } else {
             Log.d("MainActivity", "result code: ${it.resultCode}")
         }
