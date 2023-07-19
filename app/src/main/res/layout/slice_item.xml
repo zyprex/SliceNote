@@ -10,14 +10,20 @@
     app:cardElevation="4dp">
 
     <LinearLayout
+        style="@style/cardViewStyle"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
         <TextView
             android:id="@+id/seqNum"
             android:text="0"
+            android:background="?attr/colorButtonNormal"
             android:textSize="14sp"
-            android:textColor="?attr/colorAccent"
+            android:textColor="#fff"
+            android:shadowColor="#000"
+            android:shadowRadius="2"
+            android:shadowDx="1"
+            android:shadowDy="1"
             android:textAlignment="center"
             android:layout_width="30dp"
             android:layout_height="match_parent"
@@ -28,6 +34,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content">
             <TextView
+                style="@style/cardViewStyle"
                 android:id="@+id/sliceText"
                 android:text="{void}"
                 android:textIsSelectable="true"

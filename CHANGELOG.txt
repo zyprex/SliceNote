@@ -1,0 +1,9 @@
+# v2.1 - 2023 Jul.19
+
+Fix new card lost the first edit change, some UI improved.
+
+# v2.0 - 2022 Dec. 20
+
+First, make the full backup file, unintall v1.x, then import backup file.
+From this version, support audio and video in marks.
+

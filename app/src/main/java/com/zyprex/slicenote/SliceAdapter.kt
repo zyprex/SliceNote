@@ -7,8 +7,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.Drawable
-import android.media.Image
 import android.media.MediaPlayer
 import android.text.InputType
 import android.util.Log
@@ -19,11 +17,7 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.content.res.ResourcesCompat
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.Visibility
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import java.util.ArrayList
@@ -174,17 +168,21 @@ class SliceAdapter(
         }
 
         /* item btn */
-        holder.sliceItemBtn.setBackgroundColor(Color.parseColor(when(slice.prior){
-            3 -> "#FF4444"
-            2 -> "#FFBB33"
-            1 -> "#A4C639"
-            0 -> "#2196F3"
-            -1 -> "#607D84"
-            else -> "#404040"
-        }))
+        fun priorColor(prior: Int): String  { /*inline*/
+            return when(prior) {
+                3 -> "#FF4444"
+                2 -> "#FFBB33"
+                1 -> "#A4C639"
+                0 -> "#2196F3"
+                -1 -> "#607D84"
+                else -> "#404040"
+            }
+        }
+        holder.sliceSeqNum.setBackgroundColor(Color.parseColor(priorColor(slice.prior)))
+        holder.sliceItemBtn.setBackgroundColor(Color.parseColor(priorColor(slice.prior)))
 
-        holder.sliceItemBtn.setOnClickListener {
-            val popup = PopupMenu(holder.mContext, holder.sliceItemBtn)
+        fun showSideMenu(view: View) { /*inline*/
+            val popup = PopupMenu(holder.mContext, view)
             //popup.inflate(R.menu.popup)
             // groupId = 0, itemId = 0, orderId = 0, title = "..."
             popup.menu.apply {
@@ -213,6 +211,16 @@ class SliceAdapter(
             }
             popup.show()
         }
+
+        holder.sliceSeqNum.setOnClickListener { showSideMenu(holder.sliceSeqNum) }
+        holder.sliceItemBtn.setOnClickListener { showSideMenu(holder.sliceItemBtn) }
+
+        if (slice.marks.isNotEmpty() || slice.media > 0) {
+            holder.sliceItemBtn.setImageResource(R.drawable.baseline_segment_24)
+        } else {
+            holder.sliceItemBtn.setImageDrawable(null)
+        }
+
     }
 
     private fun menuActionEdit(context: Context, slice: Slice, id: Long, groupList: ArrayList<String>) {
