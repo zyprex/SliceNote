@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="MyToolbarStyle">
+    <style name="ThemeToolBar">
         <item name="android:textColor">@color/white</item>
         <item name="android:background">#404040</item>
+        <item name="colorPrimary">#404040</item>
         <item name="android:textColorSecondary">@color/white</item>
     </style>
     <style name="MyToolbarMenuStyle">

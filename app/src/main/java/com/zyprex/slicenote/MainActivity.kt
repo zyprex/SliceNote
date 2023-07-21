@@ -113,11 +113,12 @@ class MainActivity : AppCompatActivity() {
 
         loadAll.setOnClickListener {
             currentGroup = ""
+            saveToPrefs("cGroup")
             showGroupSlice()
         }
         renameGroup.setOnClickListener {
             if (currentGroup == "") {
-                Toast.makeText(this, "", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "?", Toast.LENGTH_SHORT).show()
             } else {
                 val editLine = EditText(this)
                 AlertDialog.Builder(this)
@@ -130,6 +131,7 @@ class MainActivity : AppCompatActivity() {
                             viewModel.renameGroup(currentGroup, s)
                             viewModel.sliceGroupList[viewModel.sliceGroupList.indexOf(currentGroup)] = s
                             currentGroup = s
+                            saveToPrefs("cGroup")
                             spAdapter.notifyDataSetChanged()
                         }
                     })
@@ -153,6 +155,7 @@ class MainActivity : AppCompatActivity() {
                 when (view?.id) {
                     else -> {
                         currentGroup = parent?.getItemAtPosition(position).toString()
+                        saveToPrefs("cGroup")
                         showGroupSlice()
                     }
                 }
@@ -169,6 +172,7 @@ class MainActivity : AppCompatActivity() {
             resources.getString(R.string.hide_all_seq_gt_0)
         showHide.setOnClickListener {
             currentShowHide = showHide.isChecked
+            saveToPrefs("cShowHide")
             hideShowBySeq.text = if (currentShowHide)
                 resources.getString(R.string.show_all_seq_gt_0)
             else
@@ -191,6 +195,7 @@ class MainActivity : AppCompatActivity() {
                 when (view?.id) {
                     else -> {
                         currentSort = position
+                        saveToPrefs("cSort")
                         showGroupSlice()
                     }
                 }
@@ -203,6 +208,7 @@ class MainActivity : AppCompatActivity() {
         reverseSort.isChecked = currentReverseSort
         reverseSort.setOnClickListener {
             currentReverseSort = reverseSort.isChecked
+            saveToPrefs("cReverseSort")
             showGroupSlice()
         }
 
@@ -412,6 +418,7 @@ class MainActivity : AppCompatActivity() {
             1 -> delegate.localNightMode = AppCompatDelegate.MODE_NIGHT_YES
             2 -> delegate.localNightMode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         }
+        saveToPrefs("cNightMode")
     }
 
     private fun saveLastOpenTime(reminder: Long) {
@@ -475,13 +482,16 @@ class MainActivity : AppCompatActivity() {
         State.nightMode = currentState.getInt("cNightMode", 0)
     }
 
-    private fun saveToPrefs() {
+    private fun saveToPrefs(prefName: String?) {
         getSharedPreferences("current_state", Context.MODE_PRIVATE).edit {
-            putString("cGroup", currentGroup)
-            putBoolean("cShowHide", currentShowHide)
-            putInt("cSort", currentSort)
-            putBoolean("cReverseSort", currentReverseSort)
-            putInt("cNightMode", State.nightMode)
+            when (prefName) {
+                "cGroup" -> putString("cGroup", currentGroup)
+                "cShowHide" -> putBoolean("cShowHide", currentShowHide)
+                "cSort" -> putInt("cSort", currentSort)
+                "cReverseSort" -> putBoolean("cReverseSort", currentReverseSort)
+                "cNightMode" -> putInt("cNightMode", State.nightMode)
+                else -> {}
+            }
         }
     }
 
@@ -496,7 +506,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        saveToPrefs()
+        //saveToPrefs()
         super.onDestroy()
         val marksLinearLayout = findViewById<LinearLayout>(R.id.marksLinearLayout)
         if (marksLinearLayout != null) {
@@ -506,8 +516,6 @@ class MainActivity : AppCompatActivity() {
             }
             marksLinearLayout.findViewById<VideoView>(R.id.videoView)?.suspend()
         }
-
-
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -531,6 +539,9 @@ class MainActivity : AppCompatActivity() {
     private val getResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK) {
             val newSlices = it.data?.getParcelableArrayListExtra<Slice>("new_slices")
+            if (newSlices.isNullOrEmpty()) {
+                return@registerForActivityResult
+            }
             viewModel.addNewSlices(newSlices as MutableList<Slice>)
             thread {
                 while (!MainViewModel.newAdd) {

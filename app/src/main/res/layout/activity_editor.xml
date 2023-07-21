@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@style/Theme.SliceNoteEditor"
     tools:context=".EditorActivity">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarEditor"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:titleTextColor="@color/white"
+        android:theme="@style/ThemeToolBar"
+        app:popupTheme="@style/MyToolbarMenuStyle"
+        app:title=""
+        android:elevation="4dp"
+        />
+
     <!-- AutoCompleteTextView ? -->
     <!--    <TextView
             android:layout_width="match_parent"
@@ -17,6 +30,7 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <EditText
             android:id="@+id/groupEdit"
             android:hint="@string/group"
@@ -97,9 +111,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAlignment="viewEnd" />
-    <Button
-        android:id="@+id/submitNewSlice"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
+
 </LinearLayout>

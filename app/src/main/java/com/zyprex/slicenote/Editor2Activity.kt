@@ -3,10 +3,13 @@ package com.zyprex.slicenote
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.Toolbar
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -32,17 +35,24 @@ class Editor2Activity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_editor)
 
+        /*toolbar*/
+        val toolbarEditor = findViewById<Toolbar>(R.id.toolbarEditor)
+        toolbarEditor.title = ""
+        setSupportActionBar(toolbarEditor)
+        toolbarEditor.setNavigationIcon(R.drawable.baseline_arrow_back_24)
+        toolbarEditor.setNavigationOnClickListener {
+            //onBackPressed()
+            finish()
+        }
+
         val oldSlice = intent.getParcelableExtra<Slice>("old_slice") as Slice
-        val oldSliceId = intent.getLongExtra("old_slice_id", -1)
         val groupList = intent.getStringArrayListExtra("group_list")
 
         val theCreatedTime = oldSlice.createTime
         val theCreatedTimeFormat = SimpleDateFormat(State.dateFormat, Locale.getDefault()).format(theCreatedTime)
         findViewById<TextView>(R.id.createdTime).text = String.format("%s: %s", resources.getString(R.string.created_time), theCreatedTimeFormat)
 
-        val theModifiedTime = oldSlice.modifyTime + oldSlice.createTime
-        val theModifiedTimeFormat = SimpleDateFormat(State.dateFormat, Locale.getDefault()).format(theModifiedTime)
-        findViewById<TextView>(R.id.modifiedTime).text = String.format("%s: %s", resources.getString(R.string.modified_time), theModifiedTimeFormat)
+        displayModifiedTime(oldSlice)
 
         val groupEdit = findViewById<EditText>(R.id.groupEdit)
         val frontEdit = findViewById<EditText>(R.id.frontEdit)
@@ -87,38 +97,71 @@ class Editor2Activity : AppCompatActivity() {
         mediaState1.isChecked = arrayOf(2, 3, 6, 7).contains(oldSlice.media)
         mediaState2.isChecked = arrayOf(4, 5, 6, 7).contains(oldSlice.media)
 
-        val submitNewSlice = findViewById<Button>(R.id.submitNewSlice)
-        submitNewSlice.text = resources.getString(R.string.save_change)
-        submitNewSlice.setOnClickListener {
-            var theGroup = groupEdit.text.toString()
-            if (theGroup.isEmpty()) {
-                theGroup = State.defaultGroupName
-            }
-            val theFront = frontEdit.text.toString()
-            val theBack = backEdit.text.toString()
-            val theMarks = marksEdit.text.toString()
-            var theMedia = 0
-            if (mediaState0.isChecked) {
-                theMedia += 1
-            }
-            if (mediaState1.isChecked) {
-                theMedia += 2
-            }
-            if (mediaState2.isChecked) {
-                theMedia += 4
-            }
-            val newSlice = oldSlice.copy(
-                group = theGroup,
-                front = theFront,
-                back = theBack,
-                marks = theMarks,
-                createTime = theCreatedTime,
-                modifyTime = Date().time - theCreatedTime,
-                media = theMedia
-            )
-            newSlice.id = oldSliceId
-            MainViewModel().updateSlice(newSlice)
-            Toast.makeText(this, resources.getString(R.string.changed), Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        // groupID, itemID, orderID, title
+        menu?.let {
+            it.add(0,0,0,resources.getString(R.string.save_change))
+            val itemSave = it.findItem(0)
+            itemSave.setIcon(R.drawable.baseline_save_24)
+            itemSave.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
         }
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            0 -> submitNewSlice()
+            else -> {}
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    var theModifiedTime = 0L
+    private fun displayModifiedTime(oldSlice: Slice) {
+        theModifiedTime = oldSlice.modifyTime + oldSlice.createTime
+        val theModifiedTimeFormat = SimpleDateFormat(State.dateFormat, Locale.getDefault()).format(theModifiedTime)
+        findViewById<TextView>(R.id.modifiedTime).text = String.format("%s: %s", resources.getString(R.string.modified_time), theModifiedTimeFormat)
+    }
+
+    private fun submitNewSlice() {
+        val oldSlice = intent.getParcelableExtra<Slice>("old_slice") as Slice
+        val oldSliceId = intent.getLongExtra("old_slice_id", -1)
+
+        val groupEdit = findViewById<EditText>(R.id.groupEdit)
+        val frontEdit = findViewById<EditText>(R.id.frontEdit)
+        val backEdit = findViewById<EditText>(R.id.backEdit)
+        val marksEdit = findViewById<EditText>(R.id.marksEdit)
+
+        val mediaState0 = findViewById<CheckBox>(R.id.mediaState0)
+        val mediaState1 = findViewById<CheckBox>(R.id.mediaState1)
+        val mediaState2 = findViewById<CheckBox>(R.id.mediaState2)
+
+        var theGroup = groupEdit.text.toString()
+        if (theGroup.isEmpty()) {
+            theGroup = State.defaultGroupName
+        }
+        val theFront = frontEdit.text.toString()
+        val theBack = backEdit.text.toString()
+        val theMarks = marksEdit.text.toString()
+        var theMedia = 0
+        when {
+            mediaState0.isChecked -> theMedia+=1
+            mediaState1.isChecked -> theMedia+=2
+            mediaState2.isChecked -> theMedia+=4
+        }
+        val newSlice = oldSlice.copy(
+            group = theGroup,
+            front = theFront,
+            back = theBack,
+            marks = theMarks,
+            createTime = oldSlice.createTime,
+            modifyTime = Date().time - oldSlice.createTime,
+            media = theMedia
+        )
+        newSlice.id = oldSliceId
+        MainViewModel().updateSlice(newSlice)
+        Toast.makeText(this, resources.getString(R.string.changed), Toast.LENGTH_SHORT).show()
     }
 }
