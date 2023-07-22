@@ -11,4 +11,6 @@
     <color name="bottomSheetDialogBg">#000</color>
     <color name="bottomSheetDialogFg">#fff</color>
     <color name="bottomSheetDialogBar">#222</color>
+
+    <color name="lineBeginBg">#50909090</color>
 </resources>

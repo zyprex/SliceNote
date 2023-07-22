@@ -33,12 +33,15 @@
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_height="wrap_content">
+
+            <!--                android:breakStrategy="balanced"-->
+            <!--                android:hyphenationFrequency="full"-->
             <TextView
                 style="@style/cardViewStyle"
                 android:id="@+id/sliceText"
                 android:text="{void}"
                 android:textIsSelectable="true"
-                android:textSize="24sp"
+                android:textSize="44sp"
                 android:padding="4dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
