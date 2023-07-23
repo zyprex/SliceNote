@@ -12,5 +12,5 @@
     <color name="bottomSheetDialogFg">#000</color>
     <color name="bottomSheetDialogBar">#aaa</color>
 
-    <color name="lineBeginBg">#50707070</color>
+    <color name="evenLineFg">#707070</color>
 </resources>

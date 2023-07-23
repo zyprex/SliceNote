@@ -11,10 +11,7 @@ import android.media.MediaPlayer
 import android.text.InputType
 import android.text.SpannableString
 import android.text.Spanned
-import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
-import android.text.style.ImageSpan
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -22,9 +19,7 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.*
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
@@ -504,14 +499,21 @@ class SliceAdapter(
 
     private fun prettyText(str: String) : SpannableString {
         val spannableString = SpannableString(str)
+        var isEven = true
         for (i in 0 until str.length)  {
             if (i > 0 && str[i - 1] == '\n') {
-                spannableString.setSpan(
-                    BackgroundColorSpan(
-                        ContextCompat.getColor(MyApplication.context, R.color.lineBeginBg)
+                var index = str.indexOf('\n', i)
+                if (isEven) {
+                    spannableString.setSpan(
+                        ForegroundColorSpan(
+                            ContextCompat.getColor(MyApplication.context, R.color.evenLineFg)
+                        ),
+                        i,
+                        if (index == -1) str.length else index,
+                        Spanned.SPAN_INCLUSIVE_INCLUSIVE
                     )
-                    ,
-                    i, i+1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                }
+                isEven = if (isEven) false else true
             }
         }
         return spannableString

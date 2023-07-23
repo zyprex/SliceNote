@@ -33,9 +33,6 @@
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_height="wrap_content">
-
-            <!--                android:breakStrategy="balanced"-->
-            <!--                android:hyphenationFrequency="full"-->
             <TextView
                 style="@style/cardViewStyle"
                 android:id="@+id/sliceText"
@@ -43,6 +40,8 @@
                 android:textIsSelectable="true"
                 android:textSize="44sp"
                 android:padding="4dp"
+                android:breakStrategy="balanced"
+                android:hyphenationFrequency="full"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:minHeight="44dp"/>
@@ -90,8 +89,6 @@
         </LinearLayout>
         <ImageButton
             android:id="@+id/sliceItemBtn"
-            android:text=""
-            android:textAlignment="center"
             android:background="?attr/colorButtonNormal"
             android:textSize="24sp"
             android:layout_width="30dp"
