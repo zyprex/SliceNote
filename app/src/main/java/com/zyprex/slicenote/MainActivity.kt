@@ -538,20 +538,10 @@ class MainActivity : AppCompatActivity() {
 
     private val getResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK) {
-            val newSlices = it.data?.getParcelableArrayListExtra<Slice>("new_slices")
-            if (newSlices.isNullOrEmpty()) {
-                return@registerForActivityResult
+            val newSlicesCnt = it.data?.getIntExtra("new_slices_count", 0) as Int
+            if (newSlicesCnt != 0) {
+                Toast.makeText(this, "+ ${newSlicesCnt}", Toast.LENGTH_SHORT).show()
             }
-            viewModel.addNewSlices(newSlices as MutableList<Slice>)
-            thread {
-                while (!MainViewModel.newAdd) {
-                    Thread.sleep(100)
-                }
-                showGroupSlice()
-                MainViewModel.newAdd = false
-                Log.d("MainActivity","new!")
-            }
-
         } else {
             Log.d("MainActivity", "result code: ${it.resultCode}")
         }
@@ -635,12 +625,7 @@ class MainActivity : AppCompatActivity() {
         }
         getSavedFile.launch(bkpFileName)// doesn't overwrite any exist file
     }
-    /*private fun restartActivity() {
-        val intent = intent
-        finish()
-        startActivity(intent)
-    }*/
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.toolbar, menu)
         // Build Version Code >= M
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {

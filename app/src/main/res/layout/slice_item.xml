@@ -4,14 +4,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="80dp"
-    android:layout_marginBottom="5dp"
+    android:layout_marginBottom="5sp"
     app:cardCornerRadius="0dp"
     app:cardElevation="4dp">
 
     <LinearLayout
         style="@style/cardViewStyle"
         android:orientation="horizontal"
+        android:minHeight="80sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
         <TextView
@@ -31,6 +31,7 @@
         <LinearLayout
             android:layout_weight="1"
             android:orientation="vertical"
+            android:minHeight="80sp"
             android:layout_width="0dp"
             android:layout_height="wrap_content">
             <TextView
@@ -40,50 +41,50 @@
                 android:textIsSelectable="true"
                 android:textSize="44sp"
                 android:padding="4dp"
-                android:breakStrategy="balanced"
-                android:hyphenationFrequency="full"
+                android:breakStrategy="simple"
+                android:hyphenationFrequency="none"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:minHeight="44dp"/>
+                android:minHeight="44sp"/>
             <LinearLayout
                 android:id="@+id/seqSelectLayout"
-                android:visibility="invisible"
+                android:visibility="visible"
                 android:layout_width="match_parent"
-                android:layout_height="36dp">
+                android:layout_height="36sp">
                 <Button
                     android:id="@+id/seqNumSetBtn1"
-                    android:text="1"
-                    android:layout_marginEnd="8dp"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
+                    android:text="11111111"
+                    android:maxWidth="50sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="?android:attr/buttonBarButtonStyle" />
                 <Button
                     android:id="@+id/seqNumSetBtn2"
                     android:text="2"
-                    android:layout_marginEnd="8dp"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
+                    android:maxWidth="50sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="?android:attr/buttonBarButtonStyle" />
                 <Button
                     android:id="@+id/seqNumSetBtn3"
                     android:text="3"
-                    android:layout_marginEnd="8dp"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
+                    android:maxWidth="50sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="?android:attr/buttonBarButtonStyle" />
                 <Button
                     android:id="@+id/seqNumSetBtn4"
                     android:text="4"
-                    android:layout_marginEnd="8dp"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
+                    android:maxWidth="50sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="?android:attr/buttonBarButtonStyle" />
                 <Button
                     android:id="@+id/seqNumSetBtn5"
                     android:text="M"
-                    android:layout_marginEnd="8dp"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
+                    android:maxWidth="50sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="?android:attr/buttonBarButtonStyle" />
             </LinearLayout>
         </LinearLayout>

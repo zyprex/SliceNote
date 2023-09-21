@@ -11,10 +11,6 @@ import kotlin.concurrent.thread
 
 class MainViewModel : ViewModel() {
 
-    companion object {
-        var newAdd = false
-    }
-
     var sliceListLiveData = MutableLiveData<MutableList<Slice>>()
     var sliceGroupListLiveData = MutableLiveData<MutableList<String>>()
     var sliceList = mutableListOf<Slice>()
@@ -136,12 +132,9 @@ class MainViewModel : ViewModel() {
             }
         }
     }
-    fun addNewSlices(slices: MutableList<Slice>) {
+    fun addSlice(slice: Slice) {
         thread {
-            for (s in slices) {
-                sliceDao.insertSlice(s)
-            }
-            newAdd = true
+            sliceDao.insertSlice(slice)
             updateSliceGroupList()
         }
     }
@@ -156,7 +149,7 @@ class MainViewModel : ViewModel() {
     private val handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             if (msg.what == expiredCnt && msg.arg1 > 0) {
-                Toast.makeText(MyApplication.context, msg.arg1.toString(), Toast.LENGTH_SHORT).show()
+                Toast.makeText(MyApplication.context, "Expired ${msg.arg1}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -175,7 +168,6 @@ class MainViewModel : ViewModel() {
                     }
                     sliceDao.updateSlice(s)
                 }
-
             }
             val msg = Message()
             msg.what = expiredCnt

@@ -30,8 +30,17 @@ Mainly Function List:
 
 The true Seq times depend on countdown step, if countdown step set to 1 min,
 then every minutes, each hide card whose Seq great than zero will subtract to 1.
-But IT dose not subtract to 0, if card change it Seq from 1 to 0, it'll
+But IT dose not subtract to 0, if card change it Seq change from 1 to 0, it'll
 subtract to -1, not 0. Then the card will be unhide.
+
+Let's make an instance:
+1. you have a slice set to 10, and hide it.
+2. you set the countdown step to 1 minutes in setting.
+3. close the app and wait about 5 minutes.
+4. open the app you can see the slice's seq are become 5.
+5. close the app and wait about 5 minutes again.
+6. open the app you will see the slice's seq become -1 and unhidden.
+
 
 ## How to show the image
 

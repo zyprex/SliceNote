@@ -37,7 +37,6 @@ class SliceAdapter(
     private lateinit var delSlice: Slice
     var flipList = mutableSetOf<Slice>()
 
-
     inner class ViewHolder(val mContext: Context, view: View) : RecyclerView.ViewHolder(view) {
         val sliceText: TextView = view.findViewById(R.id.sliceText)
         val sliceItemBtn: ImageButton = view.findViewById(R.id.sliceItemBtn)
@@ -75,11 +74,11 @@ class SliceAdapter(
                 3 -> menuActionDelete(holder.itemView, slice, position)
                 4 -> menuActionHide(slice, position)
                 5 -> menuActionMarks(holder.mContext, slice)
+                6 -> menuActionClone(holder.mContext, slice)
             }
             return end
         }
         /*setting restore end*/
-
         if (slice.seq != 0) {
             holder.sliceSeqNum.text = slice.seq.toString()
         } else {
@@ -200,16 +199,14 @@ class SliceAdapter(
                 add(0, 4, 4, res.getString(R.string.marks))
                 /*findItem(2).setTitle(SpannableString("delete")
                     .setSpan(ForegroundColorSpan(Color.RED), 0, 6, 0))*/
+                add(0, 5, 5, res.getString(R.string.clone))
             }
 
             popup.setOnMenuItemClickListener {
-                when (it.itemId) {
-                    0 -> menuActionSelector(it.itemId + 1)
-                    1 -> menuActionSelector(it.itemId + 1)
-                    2 -> menuActionSelector(it.itemId + 1)
-                    3 -> menuActionSelector(it.itemId + 1)
-                    4 -> menuActionSelector(it.itemId + 1)
-                    else -> false
+                if (it.itemId in 0..5) {
+                    menuActionSelector(it.itemId + 1)
+                } else {
+                    false
                 }
             }
             popup.show()
@@ -434,8 +431,8 @@ class SliceAdapter(
             initMediaPlayer(aud)
             audioPlay.setImageDrawable(imageOnButton(context, R.drawable.ic_baseline_play_arrow_24))
         }
-        mediaPlayer.setOnErrorListener { mediaPlayer, _, _ ->
-            mediaPlayer.reset()
+        mediaPlayer.setOnErrorListener { player, _, _ ->
+            player.reset()
             initMediaPlayer(aud)
             true
         }
@@ -517,6 +514,14 @@ class SliceAdapter(
             }
         }
         return spannableString
+    }
+
+    private fun menuActionClone(context: Context, slice: Slice) {
+        val clone = slice.copy()
+        sliceList.add(0, clone)
+        notifyItemInserted(0)
+        MainViewModel().addSlice(clone)
+        Toast.makeText(context, context.resources.getString(R.string.cloned), Toast.LENGTH_SHORT).show()
     }
 
     override fun getItemCount() = sliceList.count()

@@ -40,8 +40,12 @@
     <string name="created_time">创建时间</string>
     <string name="modified_time">修改时间</string>
     <string name="save_change">保存更改</string>
+    <string name="save_and_clone">保存并克隆</string>
     <string name="changed">已更改！</string>
     <string name="add">添加</string>
+    <string name="added">已添加！</string>
+    <string name="clone">克隆</string>
+    <string name="cloned">已克隆！</string>
     <string name="group">分组</string>
     <string name="front">正面</string>
     <string name="back">反面</string>

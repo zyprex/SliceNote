@@ -146,11 +146,10 @@ class Editor2Activity : AppCompatActivity() {
         val theBack = backEdit.text.toString()
         val theMarks = marksEdit.text.toString()
         var theMedia = 0
-        when {
-            mediaState0.isChecked -> theMedia+=1
-            mediaState1.isChecked -> theMedia+=2
-            mediaState2.isChecked -> theMedia+=4
-        }
+        if (mediaState0.isChecked) theMedia += 1
+        if (mediaState1.isChecked) theMedia += 2
+        if (mediaState2.isChecked) theMedia += 4
+
         val newSlice = oldSlice.copy(
             group = theGroup,
             front = theFront,
@@ -162,6 +161,7 @@ class Editor2Activity : AppCompatActivity() {
         )
         newSlice.id = oldSliceId
         MainViewModel().updateSlice(newSlice)
+        //Toast.makeText(this, "${theMedia}", Toast.LENGTH_SHORT).show()
         Toast.makeText(this, resources.getString(R.string.changed), Toast.LENGTH_SHORT).show()
     }
 }

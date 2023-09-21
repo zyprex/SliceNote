@@ -1,6 +1,15 @@
+# v2.3 - 2023 Seq.21
+
+Fixed app crashed when return from editor too quick.
+Fixed media change lost.
+Feature clone slice.
+And some UI improved.
+
+Update docs.
+
 # v2.1 - 2023 Jul.19
 
-Fix new card lost the first edit change, some UI improved.
+Fixed new card lost the first edit change, some UI improved.
 
 # v2.0 - 2022 Dec. 20
 

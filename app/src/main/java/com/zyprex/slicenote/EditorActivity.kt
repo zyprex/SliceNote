@@ -3,18 +3,17 @@ package com.zyprex.slicenote
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import java.text.SimpleDateFormat
@@ -23,7 +22,7 @@ import kotlin.collections.ArrayList
 
 class EditorActivity : AppCompatActivity() {
 
-    private var newSlices = ArrayList<Slice>()
+    private var newSlicesCount = 0
     private var groupList = ArrayList<String>()
     private var adapter: ArrayAdapter<String>? = null
 
@@ -84,17 +83,22 @@ class EditorActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         // groupID, itemID, orderID, title
         menu?.let {
-            it.add(0,0,0,resources.getString(R.string.save_change))
+            it.add(0,0,1,resources.getString(R.string.save_change))
+            it.add(0,1,0,resources.getString(R.string.save_and_clone))
             val itemSave = it.findItem(0)
+            val itemSaveClone = it.findItem(1)
             itemSave.setIcon(R.drawable.baseline_save_24)
             itemSave.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+            itemSaveClone.setIcon(R.drawable.baseline_copy_all_24)
+            itemSaveClone.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
         }
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
-            0 -> submitNewSlice()
+            0 -> submitNewSlice(false)
+            1 -> submitNewSlice(true)
             else -> {}
         }
         return super.onOptionsItemSelected(item)
@@ -109,7 +113,7 @@ class EditorActivity : AppCompatActivity() {
 
     private fun distributeNewSlices(){
         val intent = Intent()
-        intent.putParcelableArrayListExtra("new_slices", newSlices)
+        intent.putExtra("new_slices_count", newSlicesCount)
         setResult(RESULT_OK, intent)
     }
 
@@ -121,7 +125,7 @@ class EditorActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.modifiedTime).text = String.format("%s: %s", resources.getString(R.string.modified_time), theCreatedTimeFormat)
     }
 
-    private fun submitNewSlice() {
+    private fun submitNewSlice(clone: Boolean) {
         val groupEdit = findViewById<EditText>(R.id.groupEdit)
         val frontEdit = findViewById<EditText>(R.id.frontEdit)
         val backEdit = findViewById<EditText>(R.id.backEdit)
@@ -139,11 +143,10 @@ class EditorActivity : AppCompatActivity() {
         val theBack = backEdit.text.toString()
         val theMarks = marksEdit.text.toString()
         var theMedia = 0
-        when {
-            mediaState0.isChecked -> theMedia+=1
-            mediaState1.isChecked -> theMedia+=2
-            mediaState2.isChecked -> theMedia+=4
-        }
+        if (mediaState0.isChecked) theMedia += 1
+        if (mediaState1.isChecked) theMedia += 2
+        if (mediaState2.isChecked) theMedia += 4
+
         val newSlice = Slice(
             group = theGroup,
             front = theFront,
@@ -153,7 +156,9 @@ class EditorActivity : AppCompatActivity() {
             modifyTime = 0L,
             media = theMedia
         )
-        newSlices.add(newSlice)
+
+        newSlicesCount++
+        MainViewModel().addSlice(newSlice)
 
         // add new group name to group list
         if (!groupList.contains(theGroup)) {
@@ -162,13 +167,17 @@ class EditorActivity : AppCompatActivity() {
         }
 
         // clear
-        frontEdit.setText("")
-        backEdit.setText("")
-        marksEdit.setText("")
-        mediaState0.isChecked = false
-        mediaState1.isChecked = false
-        mediaState2.isChecked = false
+        if (!clone) {
+            frontEdit.setText("")
+            backEdit.setText("")
+            marksEdit.setText("")
+            mediaState0.isChecked = false
+            mediaState1.isChecked = false
+            mediaState2.isChecked = false
+        }
 
         displayCreatedTime()
+
+        Toast.makeText(this, resources.getString(R.string.added), Toast.LENGTH_SHORT).show()
     }
 }
