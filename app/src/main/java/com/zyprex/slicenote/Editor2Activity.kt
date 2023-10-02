@@ -3,6 +3,7 @@ package com.zyprex.slicenote
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -15,14 +16,21 @@ import java.util.*
 
 class Editor2Activity : AppCompatActivity() {
 
+    private var hasNewGroup = false
+    private var lastModifyGroup = ""
+    private var untouched = true
+    private var groupList = ArrayList<String>()
+    private var adapter: ArrayAdapter<String>? = null
+
     companion object {
-        fun actionStart(context: Context, slice: Slice,  sliceId: Long, groupList: ArrayList<String>) {
+        fun launchWith(context: Context, slice: Slice, sliceId: Long, groupList: ArrayList<String>) {
             val intent = Intent(context, Editor2Activity::class.java).apply {
                 putExtra("old_slice", slice)
                 putExtra("old_slice_id", sliceId)
                 putStringArrayListExtra("group_list", groupList)
             }
-            context.startActivity(intent)
+            val mainActivity = context as MainActivity
+            mainActivity.getResultFromEditor2.launch(intent)
         }
     }
 
@@ -41,12 +49,12 @@ class Editor2Activity : AppCompatActivity() {
         setSupportActionBar(toolbarEditor)
         toolbarEditor.setNavigationIcon(R.drawable.baseline_arrow_back_24)
         toolbarEditor.setNavigationOnClickListener {
-            //onBackPressed()
-            finish()
+            this.onBackPressed()
         }
 
+        groupList = intent.getStringArrayListExtra("group_list")  ?: ArrayList<String>()
+
         val oldSlice = intent.getParcelableExtra<Slice>("old_slice") as Slice
-        val groupList = intent.getStringArrayListExtra("group_list")
 
         val theCreatedTime = oldSlice.createTime
         val theCreatedTimeFormat = SimpleDateFormat(State.dateFormat, Locale.getDefault()).format(theCreatedTime)
@@ -76,7 +84,7 @@ class Editor2Activity : AppCompatActivity() {
         }
 
         val groupSpinner = findViewById<Spinner>(R.id.groupSpinner)
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, groupList as MutableList<String>)
+        adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, groupList as MutableList<String>)
         groupSpinner.adapter = adapter
         groupSpinner.setSelection(groupList.indexOf(oldSlice.group), true)
         groupSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -118,6 +126,20 @@ class Editor2Activity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun onBackPressed() {
+        distributeNewSlices() // don't put setResult bellow
+        super.onBackPressed()
+        finish()
+    }
+
+    private fun distributeNewSlices(){
+        val intent = Intent()
+        intent.putExtra("has_new_group", hasNewGroup)
+        intent.putExtra("last_modify_group", lastModifyGroup)
+        intent.putExtra("untouched", untouched)
+        setResult(RESULT_OK, intent)
+    }
+
     var theModifiedTime = 0L
     private fun displayModifiedTime(oldSlice: Slice) {
         theModifiedTime = oldSlice.modifyTime + oldSlice.createTime
@@ -126,6 +148,8 @@ class Editor2Activity : AppCompatActivity() {
     }
 
     private fun submitNewSlice() {
+        untouched = false
+
         val oldSlice = intent.getParcelableExtra<Slice>("old_slice") as Slice
         val oldSliceId = intent.getLongExtra("old_slice_id", -1)
 
@@ -142,6 +166,14 @@ class Editor2Activity : AppCompatActivity() {
         if (theGroup.isEmpty()) {
             theGroup = State.defaultGroupName
         }
+        // add new group name to group list
+        if (!groupList.contains(theGroup)) {
+            groupList.add(theGroup)
+            adapter?.notifyDataSetChanged()
+            hasNewGroup = true
+        }
+        lastModifyGroup = theGroup
+
         val theFront = frontEdit.text.toString()
         val theBack = backEdit.text.toString()
         val theMarks = marksEdit.text.toString()

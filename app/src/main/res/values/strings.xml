@@ -53,6 +53,7 @@
     <string name="prior_medium">Medium</string>
     <string name="prior_normal">Normal</string>
     <string name="prior_low">Low</string>
+    <string name="prior_unset">Unset</string>
     <string name="empty_marks">empty marks</string>
     <!-- editor activity -->
     <string name="created_time">created_time</string>
@@ -72,6 +73,7 @@
     <string name="video">video</string>
     <!--    <string name="marks"></string>-->
     <string name="expand_group_list">Expand Group List</string>
+    <string name="create_new_group">create new group</string>
     <!-- settings activity -->
     <string name="touch_action">Touch Action:</string>
     <string name="long_click">Long Click:</string>

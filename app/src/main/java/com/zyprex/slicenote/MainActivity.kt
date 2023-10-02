@@ -37,9 +37,7 @@ import com.google.gson.reflect.TypeToken
 import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.util.ArrayList
 import java.util.Date
-import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
@@ -50,8 +48,8 @@ class MainActivity : AppCompatActivity() {
     private var currentSort: Int = 0
     private var currentReverseSort: Boolean = false
 
-    private lateinit var rvAdapter: SliceAdapter
-    private lateinit var spAdapter: ArrayAdapter<String>
+    private lateinit var rvAdapter: SliceAdapter  // recycler view adapter
+    private lateinit var spAdapter: ArrayAdapter<String> // group name spinner adapter
 
     val mediaPlayer = MediaPlayer()
 
@@ -112,15 +110,14 @@ class MainActivity : AppCompatActivity() {
         val autoNightMode = findViewById<Button>(R.id.autoNightMode)
 
         loadAll.setOnClickListener {
-            currentGroup = ""
-            saveToPrefs("cGroup")
-            showGroupSlice()
+            showGroupSlice("")
         }
         renameGroup.setOnClickListener {
             if (currentGroup == "") {
                 Toast.makeText(this, "?", Toast.LENGTH_SHORT).show()
             } else {
                 val editLine = EditText(this)
+                editLine.setText(currentGroup)
                 AlertDialog.Builder(this)
                     .setView(editLine)
                     .setTitle(resources.getString(R.string.rename_group))
@@ -154,14 +151,12 @@ class MainActivity : AppCompatActivity() {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 when (view?.id) {
                     else -> {
-                        currentGroup = parent?.getItemAtPosition(position).toString()
-                        saveToPrefs("cGroup")
-                        showGroupSlice()
+                        showGroupSlice(parent?.getItemAtPosition(position).toString())
                     }
                 }
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                TODO("Not yet implemented")
+                //TODO("Not yet implemented")
             }
         }
 
@@ -256,7 +251,7 @@ class MainActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
         val layoutManager = LinearLayoutManager(this)
         recyclerView.layoutManager = layoutManager
-        rvAdapter = SliceAdapter(viewModel.sliceList, viewModel.sliceGroupList)
+        rvAdapter = SliceAdapter(this, viewModel.sliceList, viewModel.sliceGroupList)
         recyclerView.adapter = rvAdapter
 
         viewModel.sliceListLiveData.observe(this) {
@@ -300,7 +295,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        showGroupSlice()
+        //showGroupSlice()
     }
 
     private fun requestReadStoragePermission() {
@@ -386,9 +381,10 @@ class MainActivity : AppCompatActivity() {
             res.getString(R.string.prior_high),
             res.getString(R.string.prior_medium),
             res.getString(R.string.prior_normal),
-            res.getString(R.string.prior_low)
+            res.getString(R.string.prior_low),
+            res.getString(R.string.prior_unset),
         )
-        val priorityI2V = arrayOf(3, 2, 1, 0, -1) // index to value
+        val priorityI2V = arrayOf(5, 4, 3, 2, 1, 0) // index to value
         // don't use message in there
         AlertDialog.Builder(this).apply {
             setTitle(res.getString(R.string.prior_dialog_title))
@@ -410,6 +406,12 @@ class MainActivity : AppCompatActivity() {
         //Log.d("MainActivity", "showSlices: $who")
         viewModel.loadSlices(currentGroup, currentShowHide, currentSort, currentReverseSort)
         rvAdapter.flipList.clear()
+    }
+
+    private fun showGroupSlice(group: String) {
+        currentGroup = group
+        saveToPrefs("cGroup")
+        showGroupSlice()
     }
 
     private fun nightModeSelector(i: Int) {
@@ -536,16 +538,51 @@ class MainActivity : AppCompatActivity() {
    * TOOLBAR MENU
    * */
 
-    private val getResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+    val getResultFromEditor = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK) {
+            Log.d("MainActivity", it.data.toString())
             val newSlicesCnt = it.data?.getIntExtra("new_slices_count", 0) as Int
-            if (newSlicesCnt != 0) {
+            val hasNewGroup = it.data?.getBooleanExtra("has_new_group", false) as Boolean
+            val lastModifyGroup = it.data?.getStringExtra("last_modify_group") as String
+            if (newSlicesCnt == 0) {
+                return@registerForActivityResult
+            } else {
                 Toast.makeText(this, "+ ${newSlicesCnt}", Toast.LENGTH_SHORT).show()
+            }
+            if (hasNewGroup) {
+                Toast.makeText(this, resources.getString(R.string.create_new_group), Toast.LENGTH_SHORT).show()
+                viewModel.updateSliceGroupList()
+            }
+            if (lastModifyGroup.isNotEmpty()) {
+                showGroupSlice(lastModifyGroup)
+            } else {
+                showGroupSlice(State.defaultGroupName)
             }
         } else {
             Log.d("MainActivity", "result code: ${it.resultCode}")
         }
     }
+
+    val getResultFromEditor2 = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            val hasNewGroup = it.data?.getBooleanExtra("has_new_group", false) as Boolean
+            val lastModifyGroup = it.data?.getStringExtra("last_modify_group") as String
+            val untouched = it.data?.getBooleanExtra("untouched", true) as Boolean
+            if (untouched) return@registerForActivityResult
+            if (hasNewGroup) {
+                Toast.makeText(this, resources.getString(R.string.create_new_group), Toast.LENGTH_SHORT).show()
+                viewModel.updateSliceGroupList()
+            }
+            if (lastModifyGroup.isNotEmpty()) {
+                showGroupSlice(lastModifyGroup)
+            } else {
+                showGroupSlice(State.defaultGroupName)
+            }
+        } else {
+            Log.d("MainActivity", "result code: ${it.resultCode}")
+        }
+    }
+
     private val getSavedFile = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
         if (uri == null) {
             return@registerForActivityResult
@@ -662,10 +699,7 @@ class MainActivity : AppCompatActivity() {
                 findViewById<DrawerLayout>(R.id.drawerLayout).openDrawer(GravityCompat.START)
             }
             R.id.insert -> {
-                val intent = Intent(this, EditorActivity::class.java)
-                intent.putStringArrayListExtra("group_list", viewModel.sliceGroupList as ArrayList<String>)
-                intent.putExtra("in_group", currentGroup)
-                getResult.launch(intent)
+                EditorActivity.launchWith(this, viewModel.sliceGroupList as ArrayList<String>, currentGroup)
             }
             R.id.exportList -> {
                 AlertDialog.Builder(this).apply {

@@ -1,3 +1,10 @@
+# v2.4 - 2023 Oct.2
+
+Provide original name for group rename.
+Fix group list not refresh when finish edit.
+Workaround some refresh logic.
+Add 'unset' prior level.
+
 # v2.3 - 2023 Seq.21
 
 Fixed app crashed when return from editor too quick.

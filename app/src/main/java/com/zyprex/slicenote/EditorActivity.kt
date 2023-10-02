@@ -1,5 +1,6 @@
 package com.zyprex.slicenote
 
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -23,8 +24,21 @@ import kotlin.collections.ArrayList
 class EditorActivity : AppCompatActivity() {
 
     private var newSlicesCount = 0
+    private var hasNewGroup = false
+    private var lastModifyGroup = ""
     private var groupList = ArrayList<String>()
     private var adapter: ArrayAdapter<String>? = null
+
+    companion object {
+        fun launchWith(context: Context, groupList: ArrayList<String>, inGroup: String) {
+            val intent = Intent(context, EditorActivity::class.java).apply {
+                putStringArrayListExtra("group_list", groupList)
+                putExtra("in_group", inGroup)
+            }
+            val mainActivity = context as MainActivity
+            mainActivity.getResultFromEditor.launch(intent)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         when (State.nightMode) {
@@ -41,7 +55,7 @@ class EditorActivity : AppCompatActivity() {
         setSupportActionBar(toolbarEditor)
         toolbarEditor.setNavigationIcon(R.drawable.baseline_arrow_back_24)
         toolbarEditor.setNavigationOnClickListener {
-            onBackPressed()
+            this.onBackPressed()
         }
 
         groupList = intent.getStringArrayListExtra("group_list") ?: ArrayList<String>()
@@ -105,7 +119,6 @@ class EditorActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        //Log.d("EditorActivity", newSlices.toString())
         distributeNewSlices() // don't put setResult bellow
         super.onBackPressed()
         finish()
@@ -114,6 +127,8 @@ class EditorActivity : AppCompatActivity() {
     private fun distributeNewSlices(){
         val intent = Intent()
         intent.putExtra("new_slices_count", newSlicesCount)
+        intent.putExtra("has_new_group", hasNewGroup)
+        intent.putExtra("last_modify_group", lastModifyGroup)
         setResult(RESULT_OK, intent)
     }
 
@@ -139,6 +154,14 @@ class EditorActivity : AppCompatActivity() {
         if (theGroup.isEmpty()) {
             theGroup = State.defaultGroupName
         }
+        // add new group name to group list
+        if (!groupList.contains(theGroup)) {
+            groupList.add(theGroup)
+            adapter?.notifyDataSetChanged()
+            hasNewGroup = true
+        }
+        lastModifyGroup = theGroup
+
         val theFront = frontEdit.text.toString()
         val theBack = backEdit.text.toString()
         val theMarks = marksEdit.text.toString()
@@ -160,11 +183,6 @@ class EditorActivity : AppCompatActivity() {
         newSlicesCount++
         MainViewModel().addSlice(newSlice)
 
-        // add new group name to group list
-        if (!groupList.contains(theGroup)) {
-            groupList.add(theGroup)
-            adapter?.notifyDataSetChanged()
-        }
 
         // clear
         if (!clone) {

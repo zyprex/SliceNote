@@ -22,8 +22,9 @@
     <string name="prior_high">高</string>
     <string name="prior_medium">中</string>
     <string name="prior_low">低</string>
-    <string name="prior_normal">默认</string>
+    <string name="prior_normal">通常</string>
     <string name="prior_critical">紧急</string>
+    <string name="prior_unset">无</string>
     <string name="prior_dialog_title">" 选择一个优先级"</string>
     <string name="edit">编辑</string>
     <string name="prior">优先级</string>
@@ -85,4 +86,5 @@
     <string name="choose_import_action">请选择导入方式</string>
     <string name="import_from_file_m">自（多个）文件导入</string>
     <string name="import_from_clipboard">自剪贴板导入</string>
+    <string name="create_new_group">新建分组</string>
 </resources>

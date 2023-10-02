@@ -29,6 +29,7 @@ import java.util.TimerTask
 import kotlin.math.abs
 
 class SliceAdapter(
+    val ctx: Context,
     var sliceList: MutableList<Slice>,
     private var groupList: MutableList<String>
 ) :
@@ -69,7 +70,7 @@ class SliceAdapter(
 
         fun menuActionSelector(which: Int, end: Boolean = false): Boolean { /* local function */
             when (which) {
-                1 -> menuActionEdit(holder.mContext, slice, slice.id, groupList as ArrayList<String>)
+                1 -> menuActionEdit(ctx, slice, slice.id, groupList as ArrayList<String>)
                 2 -> menuActionPrior(holder.mContext, slice, position)
                 3 -> menuActionDelete(holder.itemView, slice, position)
                 4 -> menuActionHide(slice, position)
@@ -172,12 +173,13 @@ class SliceAdapter(
         /* item btn */
         fun priorColor(prior: Int): String  { /*inline*/
             return when(prior) {
-                3 -> "#FF4444"
-                2 -> "#FFBB33"
-                1 -> "#A4C639"
-                0 -> "#2196F3"
-                -1 -> "#607D84"
-                else -> "#404040"
+                5 -> "#FF4444"
+                4 -> "#FFBB33"
+                3 -> "#A4C639"
+                2 -> "#2196F3"
+                1 -> "#607D84"
+                0 -> "#00000000"
+                else -> "#00000000"
             }
         }
         holder.sliceSeqNum.setBackgroundColor(Color.parseColor(priorColor(slice.prior)))
@@ -224,7 +226,7 @@ class SliceAdapter(
     }
 
     private fun menuActionEdit(context: Context, slice: Slice, id: Long, groupList: ArrayList<String>) {
-        Editor2Activity.actionStart(context, slice, id, groupList)
+        Editor2Activity.launchWith(context, slice, id, groupList)
     }
     private fun menuActionPrior(context: Context, slice: Slice, position: Int) {
         val res = context.resources
@@ -233,9 +235,10 @@ class SliceAdapter(
             res.getString(R.string.prior_high),
             res.getString(R.string.prior_medium),
             res.getString(R.string.prior_normal),
-            res.getString(R.string.prior_low)
+            res.getString(R.string.prior_low),
+            res.getString(R.string.prior_unset),
         )
-        val priorityI2V = arrayOf(3, 2, 1, 0, -1) // index to value
+        val priorityI2V = arrayOf(5,4,3,2,1,0) // index to value
         // don't use message in there
         AlertDialog.Builder(context).apply {
             setTitle(res.getString(R.string.prior_dialog_title))
