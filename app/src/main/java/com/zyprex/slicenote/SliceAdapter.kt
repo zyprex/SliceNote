@@ -90,7 +90,7 @@ class SliceAdapter(
         holder.seqSelectLayout.visibility = View.INVISIBLE
         fun onSeqNumChange(s: String) { /* local function */
             slice.seq = s.toInt()
-            holder.sliceSeqNum.text = s
+            holder.sliceSeqNum.text = if (s != "0") s else ""
             MainViewModel().updateSlice(slice)
         }
         holder.seqNumBtn1.setOnClickListener { onSeqNumChange(holder.seqNumBtn1.text.toString()) }

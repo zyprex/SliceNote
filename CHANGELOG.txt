@@ -1,3 +1,7 @@
+# v2.4 - 2023 Oct.3
+
+Quick switch groups by click title.
+
 # v2.4 - 2023 Oct.2
 
 Provide original name for group rename.

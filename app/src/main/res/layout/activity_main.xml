@@ -23,7 +23,7 @@
             android:elevation="4dp"
             />
 
-        <!--        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        <!-- android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight"-->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
@@ -41,6 +41,28 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:layout_marginBottom="50dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textSize="20sp"
+                    android:textAlignment="center"
+                    android:fontFamily="monospace" />
+                <TextView
+                    android:id="@+id/versionName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="v0.0"
+                    android:textSize="14sp"
+                    android:textAlignment="center"
+                    android:fontFamily="monospace"/>
+            </LinearLayout>
             <Button
                 android:id="@+id/loadAll"
                 android:text="@string/load_all"

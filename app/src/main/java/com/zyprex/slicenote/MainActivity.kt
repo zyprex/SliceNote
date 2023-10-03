@@ -85,8 +85,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         toolbar.setOnClickListener {
-            showGroupSlice()
-            Toast.makeText(this, resources.getString(R.string.refresh), Toast.LENGTH_SHORT).show()
+            groupListMenu(toolbar)
+            //showGroupSlice()
+            //Toast.makeText(this, resources.getString(R.string.refresh), Toast.LENGTH_SHORT).show()
         }
         toolbar.setOnLongClickListener {
             val showHide = findViewById<CheckBox>(R.id.showHide)
@@ -96,6 +97,7 @@ class MainActivity : AppCompatActivity() {
         /* drawerLayout */
         viewModel.updateSliceGroupList()
 
+        val versionName = findViewById<TextView>(R.id.versionName)
         val loadAll = findViewById<Button>(R.id.loadAll)
         val renameGroup = findViewById<Button>(R.id.renameGroup)
         val groupSpinner = findViewById<Spinner>(R.id.groupSpinnerFilter)
@@ -108,6 +110,8 @@ class MainActivity : AppCompatActivity() {
         val lightMode = findViewById<Button>(R.id.lightMode)
         val nightMode = findViewById<Button>(R.id.nightMode)
         val autoNightMode = findViewById<Button>(R.id.autoNightMode)
+
+        versionName.text = "v${BuildConfig.VERSION_NAME}"
 
         loadAll.setOnClickListener {
             showGroupSlice("")
@@ -256,10 +260,10 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.sliceListLiveData.observe(this) {
             rvAdapter.notifyDataSetChanged()
-            val str = String.format("%s%s (%d)",
-                if (currentGroup == "") resources.getString(R.string.all) else currentGroup,
-                if (currentShowHide) " [" + resources.getString(R.string.hide) + "]" else "",
-                it.count())
+            val str = String.format("%d %s", it.count(),
+                if (currentShowHide) " [${resources.getString(R.string.hide)}]" else "")
+            supportActionBar?.title =
+                if (currentGroup == "") resources.getString(R.string.all) else currentGroup
             supportActionBar?.subtitle = str
         }
 
@@ -296,6 +300,22 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         //showGroupSlice()
+    }
+
+    private fun groupListMenu(view: View) {
+        PopupMenu(this, view).apply {
+            for (item in viewModel.sliceGroupList) {
+                if (item != currentGroup)
+                    menu.add(0, 0, 0, item)
+            }
+            setOnMenuItemClickListener {
+                when(it.itemId) {
+                    0 -> showGroupSlice("${it.title}")
+                }
+                true
+            }
+        }.show()
+
     }
 
     private fun requestReadStoragePermission() {
@@ -662,7 +682,7 @@ class MainActivity : AppCompatActivity() {
         }
         getSavedFile.launch(bkpFileName)// doesn't overwrite any exist file
     }
-     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.toolbar, menu)
         // Build Version Code >= M
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {

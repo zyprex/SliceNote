@@ -89,8 +89,8 @@ Videos:
 
 # Other Tips
 
-1. click title will refresh list
-2. long click title to show hidden list
+1. click title to quick switch to other group.
+2. long click title to show hidden list.
 3. export only apply on current group , if you want export all data,
-just click button "All" and then use menu's export
+just click button "Load All" and then use menu's export.
 
